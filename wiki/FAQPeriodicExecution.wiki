@@ -1,0 +1,23 @@
+= How to do X at every Y simulated millisecond? =
+
+{{{
+public class MyPeriodicEvent extends SimEvent {
+  private Simulation sim;
+  private double frequency; // [sec]
+
+  public MyPeriodicEvent(long timestamp, double frequency, Simulation sim) {
+    super(timestamp);
+    this.sim = sim;
+    this.frequency = frequency;
+  }
+
+  public void execute() {
+    // do X here
+
+    // reschedule for next execution:
+    queue.addEvent(new MyPeriodicEvent(timestamp + (long) (1000 * frequency), frequency, sim));
+  }
+
+   ...
+}
+}}}
