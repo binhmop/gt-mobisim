@@ -1,0 +1,9 @@
+= Q: How to get the locations of mobile objects at time t? =
+
+{{{
+  sim.runSimulationTo(t);
+  for (SimAgent agent : sim.getAgents()) {
+    IVector location = agent.getPhysicalLocation().getLocation();
+    System.out.println(agent.getSimAgentId() + " @ " + location.toCartesianVector().getY() + ", " + location.toCartesianVector().getX());
+  }
+}}}
