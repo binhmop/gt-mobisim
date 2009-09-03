@@ -15,7 +15,7 @@ public class MyPeriodicEvent extends SimEvent {
     // do X here
 
     // reschedule for next execution:
-    queue.addEvent(new MyPeriodicEvent(timestamp + (long) (1000 * frequency), frequency, sim));
+    sim.addEvent(new MyPeriodicEvent(timestamp + (long) (1000 * frequency), frequency, sim));
   }
 
    ...
