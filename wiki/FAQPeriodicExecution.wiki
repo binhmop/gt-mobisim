@@ -2,12 +2,10 @@
 
 {{{
 public class MyPeriodicEvent extends SimEvent {
-  private Simulation sim;
   private double period; // [sec]
 
-  public MyPeriodicEvent(long timestamp, double period, Simulation sim) {
-    super(timestamp);
-    this.sim = sim;
+  public MyPeriodicEvent(Simulation sim, long timestamp, double period) {
+    super(sim, timestamp);
     this.period= period;
   }
 
