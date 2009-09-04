@@ -3,19 +3,19 @@
 {{{
 public class MyPeriodicEvent extends SimEvent {
   private Simulation sim;
-  private double frequency; // [sec]
+  private double period; // [sec]
 
-  public MyPeriodicEvent(long timestamp, double frequency, Simulation sim) {
+  public MyPeriodicEvent(long timestamp, double period, Simulation sim) {
     super(timestamp);
     this.sim = sim;
-    this.frequency = frequency;
+    this.period= period;
   }
 
   public void execute() {
     // do X here
 
     // reschedule for next execution:
-    sim.addEvent(new MyPeriodicEvent(timestamp + (long) (1000 * frequency), frequency, sim));
+    sim.addEvent(new MyPeriodicEvent(timestamp + (long) (1000 * period), period, sim));
   }
 
   ...
