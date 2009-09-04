@@ -13,7 +13,7 @@ public class MyPeriodicEvent extends SimEvent {
     // do X here
 
     // reschedule for next execution:
-    sim.addEvent(new MyPeriodicEvent(timestamp + (long) (1000 * period), period, sim));
+    sim.addEvent(new MyPeriodicEvent(sim, timestamp + (long) (1000 * period), period));
   }
 
   ...
