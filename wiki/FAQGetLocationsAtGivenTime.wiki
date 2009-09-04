@@ -1,4 +1,4 @@
-= Q: How to get the locations of mobile objects at time t? =
+= Q: How to get the locations of agents at time t? =
 
 {{{
   sim.runSimulationTo(t);
@@ -6,4 +6,11 @@
     IVector location = agent.getPhysicalLocation().getLocation();
     System.out.println(agent.getSimAgentId() + " @ " + location.toCartesianVector().getY() + ", " + location.toCartesianVector().getX());
   }
+}}}
+
+
+= Q: How to get the list of agents on a segment at time t? =
+{{{
+  sim.runSimulationTo(t);
+  sim.getAgents(segment.getId());
 }}}
