@@ -23,7 +23,7 @@
 
 = Q: How to get the list of agents on a segment at time t? =
 {{{
-  public static void main2(String[] args) {
+  public static void main(String[] args) {
     String configFilename = args[0];
     long t = Long.parseLong(args[1]);
     int segmentId = Integer.parseInt(args[2]);
