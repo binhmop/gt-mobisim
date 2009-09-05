@@ -1,9 +1,13 @@
 = Q: How to get the locations of agents at time t? =
 
 {{{
+  /**
+   * Usage:
+   *   java gatech.lsp.Simulation config.xml "3.5 min"
+   */
   public static void main(String[] args) {
     String configFilename = args[0];
-    long t = Long.parseLong(args[1]);
+    long t = (long) (new TimeParser().parse(args[1]) * 1000);
 
     Simulation sim = new Simulation();
     sim.loadConfiguration(configFilename);
@@ -22,9 +26,13 @@
 
 = Q: How to get the list of agents on a segment at time t? =
 {{{
+  /**
+   * Usage:
+   *   java gatech.lsp.Simulation config.xml "100 sec" 2
+   */
   public static void main(String[] args) {
     String configFilename = args[0];
-    long t = Long.parseLong(args[1]);
+    long t = (long) (new TimeParser().parse(args[1]) * 1000);
     int segmentId = Integer.parseInt(args[2]);
 
     Simulation sim = new Simulation();
