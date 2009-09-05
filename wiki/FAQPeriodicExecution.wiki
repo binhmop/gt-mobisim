@@ -6,7 +6,7 @@ public class MyPeriodicEvent extends SimEvent {
 
   public MyPeriodicEvent(Simulation sim, long timestamp, double period) {
     super(sim, timestamp);
-    this.period= period;
+    this.period = period;
   }
 
   public void execute() {
