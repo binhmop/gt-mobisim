@@ -11,8 +11,7 @@
 
     sim.runSimulationTo(t);
     for (SimAgent agent : sim.getAgents()) {
-      IVector location = agent.getPhysicalLocation().getLocation();
-      CartesianVector l = location.toCartesianVector();
+      CartesianVector l = agent.getLocation().toCartesianVector();
       System.out.println(agent.getSimAgentId() + " @ " + l.getY() + ", " + l.getX());
     }
 
