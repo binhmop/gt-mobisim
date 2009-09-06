@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?> 
+
+<jnlp spec="1.0+" codebase="http://gt-mobisim.googlecode.com/svn/trunk" href="jnlp/gtmobisim.jnlp">
+
+    <information>
+      <title>gt-mobisim</title>
+      <vendor>Georgia Tech</vendor>
+      <homepage href="http://code.google.com/p/gt-mobisim/"/>
+      <description>Simulator for generating mobility traces and query traces for large numbers of mobile agents moving in a road network.</description>
+      <description kind="short">gt-mobisim</description> 
+      <icon href="icon.gif"/>
+      <offline-allowed /> 
+    </information>
+    
+    <security>
+      <all-permissions/>
+    </security>
+	
+    <resources> 
+      <j2se version="1.6"/>
+      <jar href="gtmobisim.jar" main="true" download="eager"/>
+      <jar href="thirdparty/gt-api-2.5.7.jar" download="lazy"/>
+      <jar href="thirdparty/gt-epsg-hsql-2.5.7.jar" download="lazy"/>
+      <jar href="thirdparty/gt-main-2.5.7.jar" download="lazy"/>
+      <jar href="thirdparty/jsr-275-1.0-beta-2.jar" download="lazy"/>
+      <jar href="thirdparty/gt-metadata-2.5.7.jar" download="lazy"/>
+      <jar href="thirdparty/jts-1.9.jar" download="lazy"/>
+      <jar href="thirdparty/gt-referencing-2.5.7.jar" download="lazy"/>
+      <jar href="thirdparty/geoapi-2.2.0.jar" download="lazy"/>
+      <jar href="thirdparty/gt-shapefile-2.5.7.jar" download="lazy"/>
+    </resources>
+	
+    <application-desc main-class="edu.gatech.lbs.sim.Simulation">
+      <argument>http://gt-mobisim.googlecode.com/svn/trunk/configs/config_jnlp.xml</argument>
+    </application-desc>
+	  
+</jnlp>
