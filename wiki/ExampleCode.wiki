@@ -6,7 +6,6 @@ An example program:
 
 [http://code.google.com/p/gt-mobisim/source/browse/trunk/src/edu/gatech/lbs/sim/examples/ExampleAgentLocations.java]
 
-
 The command line to run this example is in _configs/runjarex1.bat_:
 
 [http://gt-mobisim.googlecode.com/svn/trunk/configs/runjarex1.bat]
@@ -18,7 +17,76 @@ An example program:
 
 [http://code.google.com/p/gt-mobisim/source/browse/trunk/src/edu/gatech/lbs/sim/examples/ExampleAgentsOnSegment.java]
 
-
 The command line to run this example is in _configs/runjarex2.bat_:
 
 [http://gt-mobisim.googlecode.com/svn/trunk/configs/runjarex2.bat]
+
+
+= How to do X at every Y simulated second? =
+
+First, create your own event (a `SimEvent` subclass).
+{{{
+package edu.gatech.lbs.sim.scheduling.event;
+public class MyPeriodicEvent extends SimEvent {
+  private double period; // [sec]
+
+  public MyPeriodicEvent(Simulation sim, long timestamp, double period) {
+    super(sim, timestamp);
+    this.period = period;
+  }
+
+  public void execute() {
+    // do X here
+
+    // reschedule for next execution:
+    sim.addEvent(new MyPeriodicEvent(sim, timestamp + (long) (1000 * period), period));
+  }
+
+  ...
+}
+}}}
+
+Second, create your own activity (an `ISimActivity` implementation), which will schedule the first periodic event. (Alternatively, you could modify an existing `ISimActivity` implementation.)
+{{{
+package edu.gatech.lbs.sim.scheduling.activity;
+public class MyActivity implements ISimActivity {
+  protected double period; // [sec]
+
+  public PeriodicLocationTraceSavingActivity(double period) {
+    this.period = period;
+  }
+
+  public void scheduleOn(Simulation sim) {
+    sim.addEvent(new MyPeriodicEvent(sim, sim.getSimStartTime(), period));
+  }
+
+  public void cleanup() {
+  }
+}}}
+
+Third, create an interpreter (an `IXmlConfigInterpreter` implementation) to read the configuration parameters from a new section of the config xml. (Alternatively, you could modify an existing `IXmlConfigInterpreter` implementation. If you don't need any parameters that you need specified in the config xml, you could choose to modify `NullInterpreter`, and then skip the final step).
+
+{{{
+package edu.gatech.lbs.sim.config;
+public class MyConfigInterpreter implements IXmlConfigInterpreter {
+  public void initFromXmlElement(Element node, Simulation sim) {
+    sim.addActivity(new MyActivity(1.0));
+  }
+}
+}}}
+
+Finally, subclass `Simulation` and override `getConfigInterpreters()` to include your own `MyConfigInterpreter` among the interpreters that are unleashed on the config xml. (Alternatively, you could modify the existing `Simulation`.)
+{{{
+package edu.gatech.lbs.sim;
+public class MySimulation extends Simulation {
+  @Override
+  protected Collection<IXmlConfigInterpreter> getConfigInterpreters() {
+    Collection<IXmlConfigInterpreter> interpreters = new LinkedList<IXmlConfigInterpreter>();
+    interpreters.add(new XmlTimesConfigInterpreter());
+    interpreters.add(new XmlWorldConfigInterpreter());
+    interpreters.add(new XmlAgentsConfigInterpreter());
+    interpreters.add(new XmlMyConfigInterpreter()); // this is the new stuff, the rest is for the usual parts of the config xml
+    interpreters.add(new NullInterpreter());
+    return interpreters;
+  }
+}}}
