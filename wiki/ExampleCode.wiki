@@ -25,6 +25,25 @@ The command line to run this example is in _configs/runjarex2.bat_:
 = How do I get the simulator to do X (eg. inspect the locations of agents) at periodic simulated time intervals? =
 For the "inspect the locations of agents" part, see the previous examples. Here we are only concerned with making the simulator do something periodically.
 
+For the simplest solution, do something like this:
+{{{
+  public static void main(String[] args) {
+    Simulation sim = new Simulation();
+    sim.loadConfiguration(args[0]);
+    sim.initSimulation();
+
+    double period = 2.0; // [sec]
+    for (long t = sim.getSimStartTime(); t < sim.getSimEndTime(); t += (long)(1000 * period)) {
+      sim.runSimulationTo(t);
+      // do X here
+    }
+
+    sim.endSimulation();
+  }
+}}}
+
+Below, we look at the steps to extend the simulator to do X at periodic time intervals.
+
 First, create your own event (a `SimEvent` subclass). This event will do X, when it is scheduled for execution by the simulator, and then reschedule itself.
 {{{
 package edu.gatech.lbs.sim.scheduling.event;
