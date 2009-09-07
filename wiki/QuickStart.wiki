@@ -4,7 +4,7 @@
 
   # Download and unzip Java SDK: [http://java.sun.com/javase/downloads/index.jsp], eg. choose _JDK 6 Update 16_
   # Choose:
-    # With Eclipse:
+    # Development with Eclipse:
       # Download and unzip Eclipse: [http://www.eclipse.org/downloads/], eg. choose _Eclipse IDE for Java Developers_
       # Get gt-mobisim by choosing one of these 2 methods:
         # From Google Code SVN source depot:
@@ -27,5 +27,5 @@
           # _VM arguments:_ `-Xmx500M` (adjust this later as necessary)
           # _Working directory: Other:_ `${workspace_loc:gt-mobisim/configs}`
           # _Run_
-    # No Eclipse:
+    # Just use the ready-made _gtmobisim.jar_ (no Eclipse):
       # Get the zip: [http://code.google.com/p/gt-mobisim/]
