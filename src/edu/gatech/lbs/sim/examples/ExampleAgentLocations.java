@@ -25,7 +25,7 @@ public class ExampleAgentLocations {
     }
 
     String configFilename = args[0];
-    long t = (long) (new TimeParser().parse(args[1]) * 1000);
+    long t = (long) (new TimeParser().parse(args[1]) * 1000); // [ms]
 
     Simulation sim = new Simulation();
     sim.loadConfiguration(configFilename);

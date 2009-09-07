@@ -27,7 +27,7 @@ public class ExampleAgentsOnSegment {
     }
 
     String configFilename = args[0];
-    long t = (long) (new TimeParser().parse(args[1]) * 1000);
+    long t = (long) (new TimeParser().parse(args[1]) * 1000); // [ms]
     int segmentId = Integer.parseInt(args[2]);
 
     Simulation sim = new Simulation();
