@@ -27,10 +27,10 @@ The command line to run this example is in _configs/runjarex2.bat_:
 First, create your own event (a `SimEvent` subclass).
 {{{
 package edu.gatech.lbs.sim.scheduling.event;
-public class MyPeriodicEvent extends SimEvent {
+public class MyEvent extends SimEvent {
   private double period; // [sec]
 
-  public MyPeriodicEvent(Simulation sim, long timestamp, double period) {
+  public MyEvent(Simulation sim, long timestamp, double period) {
     super(sim, timestamp);
     this.period = period;
   }
@@ -39,7 +39,7 @@ public class MyPeriodicEvent extends SimEvent {
     // do X here
 
     // reschedule for next execution:
-    sim.addEvent(new MyPeriodicEvent(sim, timestamp + (long) (1000 * period), period));
+    sim.addEvent(new MyEvent(sim, timestamp + (long) (1000 * period), period));
   }
 
   ...
@@ -52,12 +52,12 @@ package edu.gatech.lbs.sim.scheduling.activity;
 public class MyActivity implements ISimActivity {
   protected double period; // [sec]
 
-  public PeriodicLocationTraceSavingActivity(double period) {
+  public MyActivity(double period) {
     this.period = period;
   }
 
   public void scheduleOn(Simulation sim) {
-    sim.addEvent(new MyPeriodicEvent(sim, sim.getSimStartTime(), period));
+    sim.addEvent(new MyEvent(sim, sim.getSimStartTime(), period));
   }
 
   public void cleanup() {
