@@ -1,0 +1,24 @@
+#summary Example codes.
+
+= Example: How to get the locations of agents at time t? =
+
+An example program:
+
+[http://code.google.com/p/gt-mobisim/source/browse/trunk/src/edu/gatech/lbs/sim/examples/ExampleAgentLocations.java]
+
+
+The command line to run this example is in _configs/runjarex1.bat_:
+
+[http://gt-mobisim.googlecode.com/svn/trunk/configs/runjarex1.bat]
+
+
+= Example: How to get the list of agents on a segment at time t? =
+
+An example program:
+
+[http://code.google.com/p/gt-mobisim/source/browse/trunk/src/edu/gatech/lbs/sim/examples/ExampleAgentsOnSegment.java]
+
+
+The command line to run this example is in _configs/runjarex2.bat_:
+
+[http://gt-mobisim.googlecode.com/svn/trunk/configs/runjarex2.bat]
