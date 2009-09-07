@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="thirdparty/gt-main-2.5.7.jar"/>
+	<classpathentry kind="lib" path="thirdparty/gt-shapefile-2.5.7.jar"/>
+	<classpathentry kind="lib" path="thirdparty/jts-1.9.jar"/>
+	<classpathentry kind="lib" path="thirdparty/jsr-275-1.0-beta-2.jar"/>
+	<classpathentry kind="lib" path="thirdparty/gt-api-2.5.7.jar"/>
+	<classpathentry kind="lib" path="thirdparty/geoapi-2.2.0.jar"/>
+	<classpathentry kind="lib" path="thirdparty/gt-referencing-2.5.7.jar"/>
+	<classpathentry kind="lib" path="thirdparty/gt-metadata-2.5.7.jar"/>
+	<classpathentry kind="lib" path="thirdparty/gt-epsg-hsql-2.5.7.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

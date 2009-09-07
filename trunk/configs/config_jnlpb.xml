@@ -1,0 +1,14 @@
+<simulation starttime="0 min" endtime="10 min" warmup="90 sec">
+	<world type="roadnet">
+		<file name="http://www.cc.gatech.edu/~pesti/lbs/maps/tl_2008_13089_edges.shp"/>
+	</world>
+	
+	<agents count="1000">
+		<mobilitymodel type="RandomWaypointRoadnet" filename="http://www.cc.gatech.edu/~pesti/lbs/aa1k.m.trace">
+			<parking type="gaussian" mean="15 sec" stdev="5 sec"/>
+			<locationdistribution type="uniformroadnet"/>
+			
+			<speeddistribution type="gaussian" mean="55 mph" stdev="11 mph"/>
+		</mobilitymodel>
+	</agents>
+</simulation>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="gt-mobisim" default="package-jar" basedir=".">
+
+	<target name="build">
+		<javac srcdir="./src" destdir="./bin">
+			<include name="**/*.java"/>
+		</javac>
+	</target>
+		
+    <target name="package-jar" depends="build">
+    	<jar destfile="./gtmobisim.jar" basedir="./bin" includes="**/*.class">
+	    	<manifest>
+	    		<attribute name="Main-Class" value="edu.gatech.lbs.sim.Simulation"/>
+	    		<attribute name="Class-Path" value="."/>
+	    	</manifest>
+    	</jar>
+    </target>
+	
+	<target name="package-zip" depends="package-jnlp">
+		<tstamp>
+		    <format property="filename" pattern="'./gtmobisim_'yyyyMMdd'.zip'"/>
+		</tstamp>
+		
+		<zip destfile="${filename}"
+			basedir="."
+	    	includes="src/**, thirdparty/**, configs/*.xml, configs/*.bxml, configs/maps/*, .settings/*, *.*"
+	    	excludes="**/*.class, **/*.zip, **/*.partition, **/*.kml, **/*.trace"
+			update="no"
+	    />
+	</target>
+	
+	<target name="package-jnlp" depends="package-jar, sign-jars" />
+	
+	<target name="sign-jars">
+		<!-- We only need to sign jars for use with Java Web Start, and we have
+		     an unverified signature anyway, so this pass is not a secret.  -->
+		<property name="keystore-pass" value="gtmobisim"/>
+		
+    	<signjar
+    		jar="./gtmobisim.jar"
+    		alias="${user.name}"
+    		keystore="./jnlp/keystore"
+    		storepass="${keystore-pass}"/>
+
+		<!-- sign thirdparty jars -->
+		<signjar
+		    alias="${user.name}"
+			keystore="jnlp/keystore"
+		    storepass="${keystore-pass}"
+		    lazy="true">
+		  <path>
+		    <fileset dir="thirdparty" includes="**/*.jar" />
+		  </path>
+		</signjar>
+	</target>
+	
+</project> 
