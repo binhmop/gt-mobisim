@@ -1,6 +1,6 @@
 #summary Get started with gt-mobisim
 
-= How to get _gt-mobisim_, along with source code, sample simulation configs & maps =
+= How to get _gt-mobisim_, along with source code, sample simulation configs & maps? =
 
   # Download and unzip Java SDK: [http://java.sun.com/javase/downloads/index.jsp], eg. choose _JDK 6 Update 16_
   # Choose:
