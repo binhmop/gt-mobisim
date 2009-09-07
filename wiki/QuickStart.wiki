@@ -12,7 +12,7 @@
           # In Eclipse:
             * _File/New/Other.../SVN/Checkout projects from SVN_
             * Select _Create new repository location_
-            * _URL_: `http://gt-mobisim.googlecode.com/svn` (for non-read-only access, use https here)
+            * _URL_: `http://gt-mobisim.googlecode.com/svn` (for non-read-only access, use `https` here)
             * Select _trunk_ folder
             * Select _Check out as a project configured using the New Project Wizard_
             * Select _Java Project_, and name it _gt-mobisim_
