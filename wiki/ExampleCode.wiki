@@ -1,6 +1,6 @@
 #summary Example codes.
 
-= Example: How do I get the locations of agents at time t? =
+= Example 1: How do I get the locations of agents at time t? =
 
 An example program:
 
@@ -11,7 +11,7 @@ The command line to run this example is in _configs/runjarex1.bat_:
 [http://gt-mobisim.googlecode.com/svn/trunk/configs/runjarex1.bat]
 
 
-= Example: How do I get the list of agents on a segment at time t? =
+= Example 2: How do I get the list of agents on a segment at time t? =
 
 An example program:
 
@@ -22,11 +22,11 @@ The command line to run this example is in _configs/runjarex2.bat_:
 [http://gt-mobisim.googlecode.com/svn/trunk/configs/runjarex2.bat]
 
 
-= Example: How do I do X (eg. inspect the locations of agents) every t seconds? =
+= Example 3: How do I do X (eg. inspect the locations of agents) every t seconds? =
 
 An example program:
 
-[]
+[http://code.google.com/p/gt-mobisim/source/browse/trunk/src/edu/gatech/lbs/sim/examples/ExamplePeriodicLocations.java]
 
 The command line to run this example is in _configs/runjarex3.bat_:
 
@@ -34,26 +34,7 @@ The command line to run this example is in _configs/runjarex3.bat_:
 
 
 = Advanced example: How do I get extend the simulator to do X (eg. inspect the locations of agents) at periodic simulated time intervals? =
-For the "inspect the locations of agents" part, see the previous examples. Here we are only concerned with making the simulator do something periodically.
-
-For the simplest solution, do something like this:
-{{{
-  public static void main(String[] args) {
-    Simulation sim = new Simulation();
-    sim.loadConfiguration(args[0]);
-    sim.initSimulation();
-
-    double period = 2.0; // [sec]
-    for (long t = sim.getSimStartTime(); t < sim.getSimEndTime(); t += (long)(1000 * period)) {
-      sim.runSimulationTo(t);
-      // do X here
-    }
-
-    sim.endSimulation();
-  }
-}}}
-
-Below, we look at the steps to extend the simulator to do X at periodic time intervals.
+For the "inspect the locations of agents" part, see the previous examples. Here we are only concerned with extending the simulator to do something periodically. If you have some actions that need to be executed repeatedly at time intervals that are agent-dependent, and maybe not even periodic (such as a simulated client `.sleep()`), the simple solution in Example 3 will not be sufficient. We look at the steps to extend the simulator to do X at periodic time intervals here; introducing a non-constant time interval would be an even further step.
 
 First, create your own event (a `SimEvent` subclass). This event will do X, when it is scheduled for execution by the simulator, and then reschedule itself.
 {{{
