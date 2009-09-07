@@ -1,0 +1,1 @@
+java -Xmx500M -cp "../thirdparty/*.jar" -jar ../gtmobisim.jar %1
