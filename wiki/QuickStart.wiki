@@ -1,13 +1,26 @@
-#summary QuickStart
+#summary Get started with gt-mobisim
 
-= How to get the code =
+= How to get _gt-mobisim_, along with source code, sample simulation configs & maps =
 
-Add your content here.  Format your content with:
   # Download and unzip Java SDK: [http://java.sun.com/javase/downloads/index.jsp], eg. choose _JDK 6 Update 16_
-  # Download and unzip Eclipse: [http://www.eclipse.org/downloads/], eg. choose _Eclipse IDE for Java Developers_
-  # Get gt-mobisim by choosing one of these 2 methods:
-    # From Google Code SVN source depot:
-      # Install Subclipse SVN plugin for Eclipse: [http://subclipse.tigris.org/servlets/ProjectProcess?pageID=p4wYuA]
-      # In Eclipse: File/New/Other.../SVN/Checkout projects from SVN; Create new repository location; http://gt-mobisim.googlecode.com/svn (for non-read-only access, use https here)
-[http://blog.msbbc.co.uk/2007/06/using-googles-free-svn-repository-with.html]
-    # As a zip: [http://code.google.com/p/gt-mobisim/]
+  # Choose:
+    # With Eclipse:
+      # Download and unzip Eclipse: [http://www.eclipse.org/downloads/], eg. choose _Eclipse IDE for Java Developers_
+      # Get gt-mobisim by choosing one of these 2 methods:
+        # From Google Code SVN source depot:
+          # Install Subclipse SVN plugin for Eclipse: [http://subclipse.tigris.org/servlets/ProjectProcess?pageID=p4wYuA]
+          # In Eclipse:
+            * _File/New/Other.../SVN/Checkout projects from SVN_
+            * _Create new repository location_
+            * _URL_: `http://gt-mobisim.googlecode.com/svn` (for non-read-only access, use https here)
+            * more instructions: [http://blog.msbbc.co.uk/2007/06/using-googles-free-svn-repository-with.html]
+        # As a zip: [http://code.google.com/p/gt-mobisim/]
+      # Create a run target in Eclipse:
+        # Select _gt-mobisim/edu.gatech.lbs.sim.Simulation_, then right click/_Run As/Run Configurations..._
+        # on the _Arguments_ tab:
+          # _Program arguments:_ `config1.xml`
+          # _VM arguments:_ `-Xmx500M` (adjust this later as necessary)
+          # _Working directory: Other:_ `${workspace_loc:gt-mobisim/configs}`
+          # _Run_
+    # No Eclipse:
+      # Get the zip: [http://code.google.com/p/gt-mobisim/]
