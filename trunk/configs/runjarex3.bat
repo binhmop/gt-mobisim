@@ -1,0 +1,1 @@
+java -Xmx500M -cp "../thirdparty/*.jar;../gtmobisim.jar" edu.gatech.lbs.sim.examples.ExamplePeriodicLocations jnlp-demo.xml "30 sec" 0
