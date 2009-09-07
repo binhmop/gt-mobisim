@@ -65,7 +65,7 @@ public class MyActivity implements ISimActivity {
   }
 }}}
 
-Third, create an interpreter (an `IXmlConfigInterpreter` implementation) to read the configuration parameters from a new section of the config xml. (Alternatively, you could modify an existing `IXmlConfigInterpreter` implementation. If you don't need any parameters that you need specified in the config xml, you could choose to modify `NullInterpreter`, and then skip the final step, since that interpreter is already invoked by `Simulation`.)
+Third, create an interpreter (an `IXmlConfigInterpreter` implementation) to read the configuration parameters from a new section of the config xml. (Alternatively, you could modify an existing `IXmlConfigInterpreter` implementation. If you don't need any parameters that you need specified in the config xml, you could choose to modify `NullInterpreter`, and then skip the remaining steps, since that interpreter is already invoked by `Simulation`.)
 
 {{{
 package edu.gatech.lbs.sim.config;
@@ -79,7 +79,7 @@ public class XmlMyConfigInterpreter implements IXmlConfigInterpreter {
 }
 }}}
 
-Finally, subclass `Simulation` and override `getConfigInterpreters()` to include your own `MyConfigInterpreter` among the interpreters that are unleashed on the config xml. (Alternatively, you could modify the existing `Simulation`.)
+Fourth, subclass `Simulation` and override `getConfigInterpreters()` to include your own `MyConfigInterpreter` among the interpreters that are unleashed on the config xml. (Alternatively, you could modify the existing `Simulation`.)
 {{{
 package edu.gatech.lbs.sim;
 public class MySimulation extends Simulation {
@@ -94,4 +94,15 @@ public class MySimulation extends Simulation {
     return interpreters;
   }
 }
+}}}
+
+Finally, instantiate `MySimulation` where you would have instantiated `Simulation` before, but otherwise use the same as before.
+{{{
+  public static void main(String[] args) {
+    Simulation sim = new MySimulation();
+    sim.loadConfiguration(args[0]);
+    sim.initSimulation();
+    sim.runSimulation();
+    sim.endSimulation();
+  }
 }}}
