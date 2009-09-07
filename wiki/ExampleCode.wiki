@@ -69,8 +69,11 @@ Third, create an interpreter (an `IXmlConfigInterpreter` implementation) to read
 {{{
 package edu.gatech.lbs.sim.config;
 public class MyConfigInterpreter implements IXmlConfigInterpreter {
-  public void initFromXmlElement(Element node, Simulation sim) {
-    sim.addActivity(new MyActivity(1.0));
+  // interprets the following config xml tag: <mystuff period="90 sec"/>
+  public void initFromXmlElement(Element rootNode, Simulation sim) {
+    Element myNode = (Element) rootNode.getElementsByTagName("mystuff").item(0);
+    double period = new TimeParser().parse(myNode.getAttribute("period"));
+    sim.addActivity(new MyActivity(period));
   }
 }
 }}}
