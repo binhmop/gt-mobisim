@@ -31,7 +31,7 @@
     </resources>
 	
     <application-desc main-class="edu.gatech.lbs.sim.Simulation">
-      <argument>http://gt-mobisim.googlecode.com/svn/trunk/configs/jnlp-config.xml</argument>
+      <argument>http://gt-mobisim.googlecode.com/svn/trunk/configs/jnlp-demo.xml</argument>
     </application-desc>
 	  
 </jnlp>
