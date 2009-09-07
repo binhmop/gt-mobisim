@@ -22,9 +22,10 @@ The command line to run this example is in _configs/runjarex2.bat_:
 [http://gt-mobisim.googlecode.com/svn/trunk/configs/runjarex2.bat]
 
 
-= How to do X at every Y simulated second? =
+= How do I get the simulator to do X (eg. inspect the locations of agents) at periodic simulated time intervals? =
+For the "inspect of locations of agents" part, see the previous examples. Here we are only concerned with making the simulator do something periodically.
 
-First, create your own event (a `SimEvent` subclass).
+First, create your own event (a `SimEvent` subclass). This event will do X, when it is scheduled for execution by the simulator, and then reschedule itself.
 {{{
 package edu.gatech.lbs.sim.scheduling.event;
 public class MyEvent extends SimEvent {
