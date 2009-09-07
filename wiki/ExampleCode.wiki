@@ -64,7 +64,7 @@ public class MyActivity implements ISimActivity {
   }
 }}}
 
-Third, create an interpreter (an `IXmlConfigInterpreter` implementation) to read the configuration parameters from a new section of the config xml. (Alternatively, you could modify an existing `IXmlConfigInterpreter` implementation. If you don't need any parameters that you need specified in the config xml, you could choose to modify `NullInterpreter`, and then skip the final step).
+Third, create an interpreter (an `IXmlConfigInterpreter` implementation) to read the configuration parameters from a new section of the config xml. (Alternatively, you could modify an existing `IXmlConfigInterpreter` implementation. If you don't need any parameters that you need specified in the config xml, you could choose to modify `NullInterpreter`, and then skip the final step, since that interpreter is already invoked by `Simulation`.)
 
 {{{
 package edu.gatech.lbs.sim.config;
