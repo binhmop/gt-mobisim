@@ -22,7 +22,18 @@ The command line to run this example is in _configs/runjarex2.bat_:
 [http://gt-mobisim.googlecode.com/svn/trunk/configs/runjarex2.bat]
 
 
-= How do I get the simulator to do X (eg. inspect the locations of agents) at periodic simulated time intervals? =
+= Example: How do I do X (eg. inspect the locations of agents) every t seconds? =
+
+An example program:
+
+[]
+
+The command line to run this example is in _configs/runjarex3.bat_:
+
+[http://gt-mobisim.googlecode.com/svn/trunk/configs/runjarex3.bat]
+
+
+= Advanced example: How do I get extend the simulator to do X (eg. inspect the locations of agents) at periodic simulated time intervals? =
 For the "inspect the locations of agents" part, see the previous examples. Here we are only concerned with making the simulator do something periodically.
 
 For the simplest solution, do something like this:
