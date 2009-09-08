@@ -29,4 +29,4 @@
           # _Run_
     # Just use the ready-made _gtmobisim.jar_ (no Eclipse):
       # Download and unpack the latest zip into a _gt-mobisim_ directory: [http://code.google.com/p/gt-mobisim/downloads/list]
-      # In the _configs_ subdirectory run:<br> `java -Xmx500M -cp "../thirdparty/*.jar" -jar ../gtmobisim.jar jnlp-demo.xml` <br> You could also try `runjar.bat jnlp-demo.xml` for the same result. <br> Also consider the example commands that run the [ExamplesCode]s
+      # In the _configs_ subdirectory run:<br> `java -Xmx500M -cp "../thirdparty/*.jar" -jar ../gtmobisim.jar jnlp-demo.xml` <br> You could also try `runjar.bat jnlp-demo.xml` for the same result. <br> Also consider the example commands that run the [ExampleCode]s
