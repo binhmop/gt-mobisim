@@ -1,0 +1,22 @@
+<simulation starttime="0 min" endtime="10 min" warmup="2 min">
+  <world type="roadnet">
+    <file name="maps/tl_2008_13089_edges.shp"/>
+  </world>
+  
+  <agents count="5000">
+    <mobilitymodel type="RandomWaypointRoadnet" filename="traces/a5000.m.trace">
+      <parking type="gaussian" mean="15 sec" stdev="5 sec"/>
+      <locationdistribution type="uniformroadnet"/>
+      
+      <speeddistribution type="gaussian" mean="55 mph" stdev="11 mph"/>
+    </mobilitymodel>
+
+    <periodictraceoutput period="10 sec" filename="traces/a5000.m.pos.trace"/>
+
+    <querymodel type="fixednumber_range" count="100" filename="traces/a5000.q(02mi).trace">
+      <locationdistribution type="hotspotroadnet" count="1" coeff="0.5" seed="0"/>
+      <radius type="gaussian" mean="2 mi" stdev="0.4 mi" />
+      <lifetime type="gaussian" mean="4 min" stdev="0.8 min" />
+    </querymodel>
+  </agents>
+</simulation>
