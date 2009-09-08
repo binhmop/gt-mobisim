@@ -27,7 +27,7 @@ The command line to run this example is in _configs/runjarex3.bat_:
   * [http://gt-mobisim.googlecode.com/svn/trunk/configs/runjarex3.bat]
 
 
-= Advanced example: How do I get extend the simulator to do X (eg. inspect the locations of agents) at periodic simulated time intervals? =
+= Advanced example: How do I get the simulator to do X (eg. inspect the locations of agents) at periodic simulated time intervals? =
 For the "inspect the locations of agents" part, see the previous examples. Here we are only concerned with extending the simulator to do something periodically. If you have some actions that need to be executed repeatedly at time intervals that are agent-dependent, and maybe not even periodic (such as a simulated client `.sleep()`), the simple solution in Example 3 will not be sufficient. We look at the steps to extend the simulator to do X at periodic time intervals here; introducing a non-constant time interval would be an even further step.
 
   # First, create your own event (a `SimEvent` subclass). This event will do X, when it is scheduled for execution by the simulator, and then reschedule itself.
