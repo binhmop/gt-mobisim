@@ -286,13 +286,13 @@ public class Simulation {
       eventsProcessed++;
 
       if (eventsProcessed % 1000000 == 1) {
-        System.out.println(" Queue has " + eventQueue.size() + " events, simTime= " + Stat.round(eventQueue.getNextEventTime() / (1000 * 60.0), 1) + " min, wallTime= " + Stat.round((System.nanoTime() - wallStartTime) / 1e9, 1) + " sec");
+        System.out.println(" Queue has " + eventQueue.size() + " events, simTime= " + Stat.round(eventQueue.getNextEventTime() / (1000 * 60.0), 1) + " min, wallTime= " + Stat.round((System.nanoTime() - wallStartTime) / (1e9 * 60.0), 1) + " min");
       }
     }
     Varz.set("eventsProcessed", eventsProcessed); // for the whole simulation, including warmup
     Varz.set("wallRunTime", (System.nanoTime() - wallStartTime) / 1e9); // [sec], for the whole simulation, including warmup
     double simToWallSpeedRatio = (simEndTime - simStartTime) / ((System.nanoTime() - wallStartTime) / 1e6);
-    System.out.println(" Speed: " + Stat.round(simToWallSpeedRatio, 1) + "x realtime (" + Stat.round(simToWallSpeedRatio / 60.0, 1) + " simulated hours/wall minute)");
+    System.out.println(" Speed: " + Stat.round(simToWallSpeedRatio, 1) + "x realtime (" + Stat.round(simToWallSpeedRatio, 1) + " simulated minutes/wall minute)");
     System.out.println("DONE.");
 
     Varz.set("simRunTime", (simEndTime - simStartTime - simWarmupDuration) / 1000.0); // [sec], without warmup
