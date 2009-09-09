@@ -112,19 +112,25 @@ public class RoadMap implements IWorld {
     return highestSegmentId + 1;
   }
 
+  public double getLengthTotal() {
+    double lengthTotal = 0;
+    for (RoadSegment segment : segments.values()) {
+      lengthTotal += segment.getLength();
+    }
+    return lengthTotal;
+  }
+
   public void showStats() {
     System.out.println("World bounds: " + bounds.toString());
     showSegmentStats(segments.values());
     showJunctionStats();
   }
 
-  public void showSegmentStats(Collection<RoadSegment> segs) {
+  public static void showSegmentStats(Collection<RoadSegment> segs) {
     double lengthTotal = 0, lengthMin = Double.MAX_VALUE, lengthMax = Double.MIN_VALUE;
     int pointsTotal = 0, pointsMin = Integer.MAX_VALUE, pointsMax = Integer.MIN_VALUE;
 
-    for (Iterator<RoadSegment> it = segs.iterator(); it.hasNext();) {
-      RoadSegment segment = it.next();
-
+    for (RoadSegment segment : segs) {
       double length = segment.getLength();
       lengthTotal += length;
       lengthMin = Math.min(lengthMin, length);
@@ -315,7 +321,7 @@ public class RoadMap implements IWorld {
   /**
    * Calculate path lengths between all node pairs.
    */
-  public static double[][] doFloydWarshall(double path[][], ArrayList<Integer>[][] minPath, ArrayList<Boolean>[][] direction) {
+  public static double[][] doFloydWarshall(double path[][], List<Integer>[][] minPath, List<Boolean>[][] direction) {
     int n = path.length;
 
     for (int k = 0; k < n; k++) {

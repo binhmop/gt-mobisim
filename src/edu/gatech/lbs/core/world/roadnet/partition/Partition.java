@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 import edu.gatech.lbs.core.vector.IVector;
 import edu.gatech.lbs.core.vector.RoadnetVector;
@@ -22,17 +23,17 @@ import edu.gatech.lbs.core.world.roadnet.route.Route;
 public class Partition {
   protected int pid; // partition ID
 
-  protected ArrayList<RoadSegment> segments;
+  protected List<RoadSegment> segments;
   protected HashMap<Integer, Integer> segmentMap; // segmentID --> segment-in-partition-ID mapping
 
-  protected ArrayList<RoadJunction> junctions;
+  protected List<RoadJunction> junctions;
   protected HashMap<Integer, Integer> junctionMap; // junctionID --> junction-in-partition-ID mapping
   protected boolean[] isBorderPoint; // border-points
   protected double[][] d; // node-to-node distance table
-  protected ArrayList<Integer>[][] minPath; // node-to-node shortest paths
-  protected ArrayList<Boolean>[][] direction; // node-to-node shortest paths' directionality
+  protected List<Integer>[][] minPath; // node-to-node shortest paths
+  protected List<Boolean>[][] direction; // node-to-node shortest paths' directionality
 
-  protected ArrayList<RoadnetVector> borderLocations; // derived & cached locations of all border points
+  protected List<RoadnetVector> borderLocations; // derived & cached locations of all border points
 
   public Partition(int pid) {
     this.pid = pid;
@@ -177,8 +178,8 @@ public class Partition {
    * Get the locations of all border points, in coordinates where all segmentIDs are within the partition.
    * @return
    */
-  private ArrayList<RoadnetVector> getBorderLocations() {
-    ArrayList<RoadnetVector> junctionLocations = new ArrayList<RoadnetVector>();
+  private List<RoadnetVector> getBorderLocations() {
+    List<RoadnetVector> junctionLocations = new ArrayList<RoadnetVector>();
     for (int i = 0; i < isBorderPoint.length; i++) {
       if (isBorderPoint[i]) {
         RoadJunction junction = junctions.get(i);
@@ -286,9 +287,9 @@ public class Partition {
    * @param location
    * @return
    */
-  public Route getRouteToNearestTriggerPoint(ArrayList<RoadnetVector> points, RoadnetVector location) {
+  public Route getRouteToNearestTriggerPoint(List<RoadnetVector> points, RoadnetVector location) {
     // add border points to trigger point set:
-    ArrayList<RoadnetVector> triggers = new ArrayList<RoadnetVector>();
+    List<RoadnetVector> triggers = new ArrayList<RoadnetVector>();
     triggers.addAll(borderLocations);
     triggers.addAll(points);
 
