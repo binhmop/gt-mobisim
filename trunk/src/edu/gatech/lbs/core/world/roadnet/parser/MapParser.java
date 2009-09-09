@@ -4,40 +4,40 @@
 //
 package edu.gatech.lbs.core.world.roadnet.parser;
 
+import java.util.HashMap;
+import java.util.List;
+
 import edu.gatech.lbs.core.vector.CartesianVector;
 import edu.gatech.lbs.core.world.roadnet.RoadJunction;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
 public class MapParser {
-	protected HashMap<CartesianVector, RoadJunction> junctionMap;
+  protected HashMap<CartesianVector, RoadJunction> junctionMap;
 
-	public MapParser() {
-		junctionMap = new HashMap<CartesianVector, RoadJunction>();
-	}
+  public MapParser() {
+    junctionMap = new HashMap<CartesianVector, RoadJunction>();
+  }
 
-	public RoadJunction[] getJunctions(ArrayList<CartesianVector> points) {
+  public RoadJunction[] getJunctions(List<CartesianVector> points) {
 
-		RoadJunction[] junctions = new RoadJunction[2];
-		for (int i = 0; i < 2; i++) {
-			// determine location of junction:
-			CartesianVector junctionLocation;
-			if (i == 0) {
-				junctionLocation = points.get(0);
-			} else {
-				junctionLocation = points.get(points.size() - 1);
-			}
+    RoadJunction[] junctions = new RoadJunction[2];
+    for (int i = 0; i < 2; i++) {
+      // determine location of junction:
+      CartesianVector junctionLocation;
+      if (i == 0) {
+        junctionLocation = points.get(0);
+      } else {
+        junctionLocation = points.get(points.size() - 1);
+      }
 
-			// retrieve junction from map, or create anew:
-			if (junctionMap.containsKey(junctionLocation)) {
-				junctions[i] = junctionMap.get(junctionLocation);
-			} else {
-				junctions[i] = new RoadJunction(junctionMap.size());
-				junctionMap.put(junctionLocation, junctions[i]);
-			}
-		}
+      // retrieve junction from map, or create anew:
+      if (junctionMap.containsKey(junctionLocation)) {
+        junctions[i] = junctionMap.get(junctionLocation);
+      } else {
+        junctions[i] = new RoadJunction(junctionMap.size());
+        junctionMap.put(junctionLocation, junctions[i]);
+      }
+    }
 
-		return junctions;
-	}
+    return junctions;
+  }
 }

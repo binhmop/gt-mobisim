@@ -1,9 +1,9 @@
 <simulation starttime="0 min" endtime="10 min" warmup="90 sec">
   <world type="roadnet">
   <file name="http://gt-mobisim.googlecode.com/svn/trunk/configs/maps/Northwest_Atlanta_GA_24k.svg">
-    <class name="CLASS_1" v_max="30 mph"/>
+    <class name="CLASS_1" v_max="70 mph"/>
     <class name="CLASS_2" v_max="55 mph"/>
-    <class name="CLASS_3" v_max="70 mph"/>
+    <class name="CLASS_3" v_max="30 mph"/>
     <class name="INTERCHANGE" v_max="30 mph"/>
   </file>
   </world>
@@ -15,9 +15,9 @@
       <locationdistribution type="hotspotroadnet" count="2" coeff="0.5" seed="0"/>
 			
       <speeddistribution type="roadnet">
-        <class type="gaussian" mean="30 mph" stdev="6 mph"/>
-        <class type="gaussian" mean="55 mph" stdev="11 mph"/>
         <class type="gaussian" mean="70 mph" stdev="14 mph"/>
+        <class type="gaussian" mean="55 mph" stdev="11 mph"/>
+        <class type="gaussian" mean="30 mph" stdev="6 mph"/>
         <class type="gaussian" mean="30 mph" stdev="6 mph"/>
       </speeddistribution>
     </mobilitymodel>
