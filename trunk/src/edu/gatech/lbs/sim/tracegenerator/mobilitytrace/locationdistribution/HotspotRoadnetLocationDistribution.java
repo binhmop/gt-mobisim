@@ -45,10 +45,11 @@ public class HotspotRoadnetLocationDistribution implements ILocationDistribution
       // calculate hotspottyness of all segments:
       HashMap<Integer, Double> junctionDist = new HashMap<Integer, Double>();
       roadmap.getSpanningTree(source, junctionDist, null);
+      double lengthAvg = roadmap.getLengthTotal() / roadmap.getRoadSegments().size();
       for (int j = 0; j < segmentCount; j++) {
         RoadSegment seg = segments[j];
         double dist = (j == centerNum) ? 0 : Math.min(junctionDist.get(seg.getSourceJunction().getId()), junctionDist.get(seg.getTargetJunction().getId())) + seg.getLength() / 2;
-        segmentWeights[j] += Math.pow(coeff, dist / 1000.0);
+        segmentWeights[j] += Math.pow(coeff, dist / lengthAvg);
       }
     }
     // System.out.println("done.");
