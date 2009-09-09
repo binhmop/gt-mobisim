@@ -285,7 +285,7 @@ public class Simulation {
       eventQueue.executeNextEvent();
       eventsProcessed++;
 
-      if (eventsProcessed % 100000 == 1) {
+      if (eventsProcessed % 1000000 == 1) {
         System.out.println(" Queue has " + eventQueue.size() + " events, simTime= " + Stat.round(eventQueue.getNextEventTime() / (1000 * 60.0), 1) + " min, wallTime= " + Stat.round((System.nanoTime() - wallStartTime) / 1e9, 1) + " sec");
       }
     }
