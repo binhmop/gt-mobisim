@@ -7,6 +7,7 @@ package edu.gatech.lbs.core.world.roadnet.parser;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.StringTokenizer;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -59,7 +60,7 @@ public class SvgMapParser extends MapParser {
             String pointsStr = polylineNode.getAttribute("points");
 
             StringTokenizer st = new StringTokenizer(pointsStr);
-            ArrayList<CartesianVector> points = new ArrayList<CartesianVector>();
+            List<CartesianVector> points = new ArrayList<CartesianVector>();
             while (st.hasMoreTokens()) {
               String value = st.nextToken();
               int idx = value.indexOf(',');
