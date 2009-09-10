@@ -50,7 +50,7 @@ public class XmlQueryModelInterpreter implements IXmlConfigInterpreter {
       IParamDistribution lifetimeDistribution = interpreter2.getParamDistribution();
 
       // location distribution:
-      // if there is no locationdistribution defined, the queries will be uniformly distributed across userIDs
+      // if there is no locationdistribution defined, the queries will be uniformly distributed across simAgentIds
       Element locationDistributionNode = (Element) querymodelNode.getElementsByTagName("locationdistribution").item(0);
       XmlLocationDistributionInterpreter ldInterpreter = new XmlLocationDistributionInterpreter();
       ldInterpreter.initFromXmlElement(locationDistributionNode, sim);
