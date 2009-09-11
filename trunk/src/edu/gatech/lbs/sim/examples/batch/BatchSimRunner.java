@@ -96,7 +96,7 @@ public class BatchSimRunner {
                 Logz.print(";");
                 permutationStr.append('\t');
               }
-              System.out.print(permutation[i]);
+              Logz.print("" + permutation[i]);
               permutationStr.append(permutation[i]);
             }
             newText.append(options[i][permutation[i]]);
@@ -111,7 +111,7 @@ public class BatchSimRunner {
           Varz.set("permutationStrShort", permutationStr.substring(0, permutationStr.length() - 1).replace('\t', '.'));
           runSimulationBySpecification(newText.toString());
 
-          System.out.println();
+          Logz.println();
 
           // next permutation:
           for (int i = 0; i < permutation.length; i++) {
@@ -125,7 +125,7 @@ public class BatchSimRunner {
         }
       }
     } catch (IOException e) {
-      System.out.println(e);
+      Logz.println("" + e);
       System.exit(-1);
     }
   }
