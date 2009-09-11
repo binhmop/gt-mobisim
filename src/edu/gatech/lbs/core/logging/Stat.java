@@ -65,7 +65,7 @@ public class Stat {
     return numbers[minIdx];
   }
 
-  public static double getValueCount(double[] numbers, double value) {
+  public static int getValueCount(double[] numbers, double value) {
     int count = 0;
 
     for (int i = 1; i < numbers.length; i++) {
