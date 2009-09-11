@@ -12,6 +12,7 @@ import java.util.TimeZone;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.HttpServer;
 
 import edu.gatech.lbs.core.logging.Logz;
 import edu.gatech.lbs.core.logging.Varz;
@@ -21,6 +22,7 @@ public class SimMonitorHttpServer implements HttpHandler {
   public static final String contextStr = "/sim";
 
   public BatchSimRunner batchRunner;
+  public HttpServer server;
 
   public void handle(HttpExchange t) throws IOException {
     // InputStream is = t.getRequestBody();
