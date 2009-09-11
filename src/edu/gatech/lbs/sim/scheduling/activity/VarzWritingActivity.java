@@ -28,7 +28,7 @@ public class VarzWritingActivity implements ISimActivity {
     if (!varzFilename.isEmpty()) {
       System.out.print("Writing varz file... ");
       try {
-        BufferedWriter out = new BufferedWriter(new FileWriter(varzFilename));
+        BufferedWriter out = new BufferedWriter(new FileWriter(varzFilename, true));
         getVarzFormatter().writeTo(out);
         out.close();
         System.out.println("done.");

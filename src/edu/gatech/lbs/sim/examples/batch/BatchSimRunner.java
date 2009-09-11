@@ -5,8 +5,10 @@
 package edu.gatech.lbs.sim.examples.batch;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -55,10 +57,14 @@ public class BatchSimRunner {
 
     try {
       System.out.println("Loading configuration file '" + configFilename + "'... ");
-      String varzFilename = "varz." + configFilename + ".dat";
       InputStream in = FileHelper.openFileOrUrl(configFilename);
       String contents = FileHelper.getContentsFromInputStream(in);
       in.close();
+
+      // clear varz output file:
+      String varzFilename = "varz." + configFilename + ".dat";
+      BufferedWriter out = new BufferedWriter(new FileWriter(varzFilename));
+      out.close();
 
       String[] parts = contents.split("[\\{\\}]");
 
@@ -106,7 +112,7 @@ public class BatchSimRunner {
 
           // run simulation:
           Varz.set("configFilename", configFilename);
-          Varz.set("logFilename", varzFilename);
+          Varz.set("varzFilename", varzFilename);
           Varz.set("permutationStr", permutationStr.toString());
           Varz.set("permutationStrShort", permutationStr.substring(0, permutationStr.length() - 1).replace('\t', '.'));
           runSimulationBySpecification(newText.toString());
@@ -136,20 +142,26 @@ public class BatchSimRunner {
     for (String configFilename : configFilenames) {
       runSimulationSet(configFilename);
     }
+
+    stopHttpServer();
   }
 
   public static void startHttpServer() {
     try {
       System.out.print("Starting monitoring HTTP server at http://127.0.0.1:" + SimMonitorHttpServer.portNum + SimMonitorHttpServer.contextStr + "... ");
-      HttpServer server = HttpServer.create(new InetSocketAddress(SimMonitorHttpServer.portNum), 5);
       simMonitorHttpServer = new SimMonitorHttpServer();
-      server.createContext(SimMonitorHttpServer.contextStr, simMonitorHttpServer);
-      server.setExecutor(null); // creates a default executor
-      server.start();
+      simMonitorHttpServer.server = HttpServer.create(new InetSocketAddress(SimMonitorHttpServer.portNum), 5);
+      simMonitorHttpServer.server.createContext(SimMonitorHttpServer.contextStr, simMonitorHttpServer);
+      simMonitorHttpServer.server.setExecutor(null); // creates a default executor
+      simMonitorHttpServer.server.start();
       System.out.println("done.");
     } catch (IOException e) {
       System.out.println("failed.");
     }
+  }
+
+  public static void stopHttpServer() {
+    simMonitorHttpServer.server.stop(0);
   }
 
   public void go(String[] args) {
@@ -216,6 +228,7 @@ public class BatchSimRunner {
         startHttpServer();
         String configFileName = args[args.length - 1];
         runSimulationSet(configFileName);
+        stopHttpServer();
       }
 
     } else {
