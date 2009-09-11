@@ -65,6 +65,18 @@ public class Stat {
     return numbers[minIdx];
   }
 
+  public static double getValueCount(double[] numbers, double value) {
+    int count = 0;
+
+    for (int i = 1; i < numbers.length; i++) {
+      if (numbers[i] == value) {
+        count++;
+      }
+    }
+
+    return count;
+  }
+
   public static double round(double v, int fractions) {
     double tens = Math.pow(10, fractions);
     return Math.round(v * tens) / tens;
