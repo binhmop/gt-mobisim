@@ -27,11 +27,6 @@ public class TraceGenerationActivity implements ISimActivity {
     } catch (IOException e) {
       // read failure indicates we need to go forward with the trace generation
     }
-    /*
-    File f = new File(traceFilename);
-    if (f.exists() && f.length() > 0) {
-      return;
-    }*/
 
     System.out.println(" Generating trace '" + traceFilename + "'... ");
     try {
