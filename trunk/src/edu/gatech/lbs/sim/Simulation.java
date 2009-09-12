@@ -22,6 +22,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
 import edu.gatech.lbs.core.FileHelper;
+import edu.gatech.lbs.core.logging.Logz;
 import edu.gatech.lbs.core.logging.Stat;
 import edu.gatech.lbs.core.logging.Varz;
 import edu.gatech.lbs.core.query.LocationBasedQuery;
@@ -188,7 +189,7 @@ public class Simulation {
 
       loadConfigurationFromSpecification(contents.toString());
     } catch (IOException e) {
-      System.out.println(e);
+      Logz.println("" + e);
       System.exit(-1);
     }
   }
@@ -205,27 +206,27 @@ public class Simulation {
 
       Collection<IXmlConfigInterpreter> interpreters = getConfigInterpreters();
       for (IXmlConfigInterpreter interpreter : interpreters) {
-        System.out.println("Config interpreter: " + interpreter.getClass().getSimpleName());
+        Logz.println("Config interpreter: " + interpreter.getClass().getSimpleName());
         interpreter.initFromXmlElement(rootNode, this);
       }
 
     } catch (IOException e) {
-      System.out.println("IOException");
+      Logz.println("IOException");
       System.exit(-1);
     } catch (SAXParseException e) {
-      System.out.println("Parsing error on line " + e.getLineNumber());
-      System.out.println(" " + e.getMessage());
+      Logz.println("Parsing error on line " + e.getLineNumber());
+      Logz.println(" " + e.getMessage());
       System.exit(-1);
     } catch (SAXException e) {
-      System.out.println("SAXException");
+      Logz.println("SAXException");
       Exception x = e.getException();
       ((x == null) ? e : x).printStackTrace();
       System.exit(-1);
     } catch (ParserConfigurationException e) {
-      System.out.println("ParserConfigurationException");
+      Logz.println("ParserConfigurationException");
       System.exit(-1);
     }
-    System.out.println("Configuration loaded.\n");
+    Logz.println("Configuration loaded.\n");
   }
 
   /**
@@ -259,7 +260,7 @@ public class Simulation {
     simTime = simStartTime;
 
     for (ISimActivity activity : simActivities) {
-      System.out.println("Scheduling activity: " + activity.getClass().getSimpleName());
+      Logz.println("Scheduling activity: " + activity.getClass().getSimpleName());
       activity.scheduleOn(this);
     }
   }
@@ -278,7 +279,7 @@ public class Simulation {
    */
   public void runSimulation() {
     // simulation loop:
-    System.out.println("Running simulation... ");
+    Logz.println("Running simulation... ");
     long wallStartTime = System.nanoTime();
     long eventsProcessed = 0;
     while ((simTime = eventQueue.getNextEventTime()) >= 0 && simTime < simEndTime) {
@@ -286,14 +287,14 @@ public class Simulation {
       eventsProcessed++;
 
       if (eventsProcessed % 1000000 == 1) {
-        System.out.println(" Queue has " + eventQueue.size() + " events, simTime= " + Stat.round(eventQueue.getNextEventTime() / (1000 * 60.0), 1) + " min, wallTime= " + Stat.round((System.nanoTime() - wallStartTime) / (1e9 * 60.0), 1) + " min");
+        Logz.println(" Queue has " + eventQueue.size() + " events, simTime= " + Stat.round(eventQueue.getNextEventTime() / (1000 * 60.0), 1) + " min, wallTime= " + Stat.round((System.nanoTime() - wallStartTime) / (1e9 * 60.0), 1) + " min");
       }
     }
     Varz.set("eventsProcessed", eventsProcessed); // for the whole simulation, including warmup
     Varz.set("wallRunTime", (System.nanoTime() - wallStartTime) / 1e9); // [sec], for the whole simulation, including warmup
     double simToWallSpeedRatio = (simEndTime - simStartTime) / ((System.nanoTime() - wallStartTime) / 1e6);
-    System.out.println(" Speed: " + Stat.round(simToWallSpeedRatio, 1) + "x realtime (" + Stat.round(simToWallSpeedRatio, 1) + " simulated minutes/wall minute)");
-    System.out.println("DONE.");
+    Logz.println(" Speed: " + Stat.round(simToWallSpeedRatio, 1) + "x realtime (" + Stat.round(simToWallSpeedRatio, 1) + " simulated minutes/wall minute)");
+    Logz.println("DONE.");
 
     Varz.set("simRunTime", (simEndTime - simStartTime - simWarmupDuration) / 1000.0); // [sec], without warmup
     Varz.set("agentCount", agents.size());
