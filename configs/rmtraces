@@ -1,1 +1,1 @@
-rm traces\* -f
+rm traces/* -f
