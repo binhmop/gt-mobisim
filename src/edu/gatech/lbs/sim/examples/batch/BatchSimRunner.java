@@ -62,7 +62,7 @@ public class BatchSimRunner {
       in.close();
 
       // clear varz output file:
-      String varzFilename = "varz." + configFilename + ".dat";
+      String varzFilename = "varz." + configFilename + ".txt";
       BufferedWriter out = new BufferedWriter(new FileWriter(varzFilename));
       out.close();
 
