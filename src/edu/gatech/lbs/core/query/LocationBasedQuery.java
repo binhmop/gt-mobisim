@@ -28,6 +28,10 @@ public abstract class LocationBasedQuery {
     return results;
   }
 
+  public int getResultCount() {
+    return results == null ? 0 : results.size();
+  }
+
   public void setResults(List<Integer> newResults) {
     results = newResults;
   }
