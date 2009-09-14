@@ -57,21 +57,31 @@ public class XmlMobilityModelInterpreter implements IXmlConfigInterpreter {
       mobilityTraceGenerator = new IndividualMobilityTraceGenerator(sim.getSimStartTime(), sim.getSimEndTime(), mobilityModels);
 
     } else if (mobilitymodelType.equalsIgnoreCase(RoadnetRandomWaypoint_IndividualMobilityModel.xmlName)) {
+      Element stoppingTimeNode = (Element) mobilitymodelNode.getElementsByTagName("stopping").item(0);
+      XmlParamDistributionInterpreter sInterpreter = new XmlParamDistributionInterpreter(new TimeParser());
+      sInterpreter.initFromXmlElement(stoppingTimeNode, sim);
+      IParamDistribution stoppingTimeDistribution = sInterpreter.getParamDistribution();
+
       List<IndividualMobilityModel> mobilityModels = new ArrayList<IndividualMobilityModel>(agents.size());
       for (SimAgent agent : agents) {
-        mobilityModels.add(new RoadnetRandomWaypoint_IndividualMobilityModel(sim, agent, locationDistribution, speedDistribution, sim.getSimStartTime()));
+        mobilityModels.add(new RoadnetRandomWaypoint_IndividualMobilityModel(sim, agent, locationDistribution, speedDistribution, stoppingTimeDistribution, sim.getSimStartTime()));
       }
       mobilityTraceGenerator = new IndividualMobilityTraceGenerator(sim.getSimStartTime(), sim.getSimEndTime(), mobilityModels);
 
     } else if (mobilitymodelType.equalsIgnoreCase(RoadnetRandomTrip_IndividualMobilityModel.xmlName)) {
       Element parkingTimeNode = (Element) mobilitymodelNode.getElementsByTagName("parking").item(0);
-      XmlParamDistributionInterpreter interpreter = new XmlParamDistributionInterpreter(new TimeParser());
-      interpreter.initFromXmlElement(parkingTimeNode, sim);
-      IParamDistribution parkingTimeDistribution = interpreter.getParamDistribution();
+      XmlParamDistributionInterpreter pInterpreter = new XmlParamDistributionInterpreter(new TimeParser());
+      pInterpreter.initFromXmlElement(parkingTimeNode, sim);
+      IParamDistribution parkingTimeDistribution = pInterpreter.getParamDistribution();
+
+      Element stoppingTimeNode = (Element) mobilitymodelNode.getElementsByTagName("stopping").item(0);
+      XmlParamDistributionInterpreter sInterpreter = new XmlParamDistributionInterpreter(new TimeParser());
+      sInterpreter.initFromXmlElement(stoppingTimeNode, sim);
+      IParamDistribution stoppingTimeDistribution = sInterpreter.getParamDistribution();
 
       List<IndividualMobilityModel> mobilityModels = new ArrayList<IndividualMobilityModel>(agents.size());
       for (SimAgent agent : agents) {
-        mobilityModels.add(new RoadnetRandomTrip_IndividualMobilityModel(sim, agent, locationDistribution, speedDistribution, parkingTimeDistribution, sim.getSimStartTime(), (RoadMap) sim.getWorld()));
+        mobilityModels.add(new RoadnetRandomTrip_IndividualMobilityModel(sim, agent, locationDistribution, speedDistribution, parkingTimeDistribution, stoppingTimeDistribution, sim.getSimStartTime(), (RoadMap) sim.getWorld()));
       }
       mobilityTraceGenerator = new IndividualMobilityTraceGenerator(sim.getSimStartTime(), sim.getSimEndTime(), mobilityModels);
 

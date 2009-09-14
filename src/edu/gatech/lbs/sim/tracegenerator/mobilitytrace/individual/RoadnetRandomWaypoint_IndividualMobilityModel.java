@@ -19,35 +19,37 @@ public class RoadnetRandomWaypoint_IndividualMobilityModel extends IndividualMob
   public static final String xmlName = "RandomWaypointRoadnet";
 
   protected RoadnetVector location;
-  protected RoadnetVector destination;
+  protected RoadnetVector destination; // next waypoint (junction)
   protected RoadnetVector v; // [m/s]
   protected SimAgent agent;
 
   protected ILocationDistribution locationDistribution;
   protected IParamDistribution speedDistribution;
+  protected IParamDistribution stoppingTimeDistribution;
 
-  public RoadnetRandomWaypoint_IndividualMobilityModel(Simulation sim, SimAgent agent, ILocationDistribution locationDistribution, IParamDistribution speedDistribution, long timestamp) {
+  public RoadnetRandomWaypoint_IndividualMobilityModel(Simulation sim, SimAgent agent, ILocationDistribution locationDistribution, IParamDistribution speedDistribution, IParamDistribution stoppingTimeDistribution, long timestamp) {
     this.sim = sim;
     this.agent = agent;
-    this.location = locationDistribution.getNextLocation().toRoadnetVector();
+
     this.locationDistribution = locationDistribution;
     this.speedDistribution = speedDistribution;
+    this.stoppingTimeDistribution = stoppingTimeDistribution;
     this.timestamp = timestamp;
+  }
 
-    location = null;
+  protected void stopMoving() {
+    v = new RoadnetVector(location.getRoadSegment(), 0);
+  }
+
+  protected void startMovingOnNewSegment() {
+    v = new RoadnetVector(location.getRoadSegment(), (destination.getProgress() > location.getProgress() ? +1 : -1) * (float) Math.abs(speedDistribution.getNextValue(location)));
   }
 
   public SimEvent getNextEvent() {
-    // set new location:
-    if (location != null) {
-      // move to destination:
-      timestamp += (long) (1000 * location.vectorTo(destination).getLength() / v.getLength());
-      location = destination;
-    } else {
-      // set initial location:
+    // set initial location, speed & destination::
+    if (location == null) {
       location = locationDistribution.getNextLocation().toRoadnetVector();
 
-      // set initial speed & destination:
       RoadSegment segment = location.toRoadnetVector().getRoadSegment();
       v = new RoadnetVector(segment, (float) speedDistribution.getNextValue(location));
       destination = new RoadnetVector(segment, v.getLength() > 0 ? segment.getLength() : 0);
@@ -55,19 +57,38 @@ public class RoadnetRandomWaypoint_IndividualMobilityModel extends IndividualMob
       return new VelocityChangeEvent(sim, timestamp, agent, location, v);
     }
 
+    // if we have nowhere to go, there are no events:
+    if (location == destination) {
+      return null;
+    }
+
+    // if we are not moving (but have somewhere to go), we keep stopped for a bit:
+    if (v.getLength() == 0) {
+      // stop at intersection before starting to move:
+      if (stoppingTimeDistribution != null) {
+        timestamp += (long) (1000 * stoppingTimeDistribution.getNextValue(location));
+      }
+      startMovingOnNewSegment();
+
+      return new VelocityChangeEvent(sim, timestamp, agent, location, v);
+    }
+
+    // if we are moving, we travel to our destination:
+    timestamp += (long) (1000 * location.vectorTo(destination).getLength() / v.getLength());
+    location = destination;
+
     RoadSegment roadsegment = location.getRoadSegment();
     double progress = location.getProgress();
     List<RoadSegment> originatingRoads = null;
     List<RoadSegment> terminatingRoads = null;
 
-    double len = roadsegment.getLength();
     // if at the origin of current segment:
     if (progress == 0 && !roadsegment.isDirected()) {
       originatingRoads = roadsegment.getSourceJunction().getOriginatingRoads();
       terminatingRoads = roadsegment.getSourceJunction().getTerminatingUndirectedRoads();
     }
     // if at termination of current segment:
-    else if (progress == len) {
+    else if (progress == roadsegment.getLength()) {
       originatingRoads = roadsegment.getTargetJunction().getOriginatingRoads();
       terminatingRoads = roadsegment.getTargetJunction().getTerminatingUndirectedRoads();
     }
@@ -96,11 +117,15 @@ public class RoadnetRandomWaypoint_IndividualMobilityModel extends IndividualMob
         destination = new RoadnetVector(roadsegment, 0);
       }
 
-      v = new RoadnetVector(roadsegment, (destination.getProgress() > location.getProgress() ? +1 : -1) * (float) Math.abs(speedDistribution.getNextValue(location)));
+      if (stoppingTimeDistribution != null) {
+        stopMoving();
+      } else {
+        startMovingOnNewSegment();
+      }
     }
     // if there are no outgoing roads, stay stationary at dead end:
     else {
-      v = new RoadnetVector(roadsegment, 0);
+      stopMoving();
       destination = location;
     }
 
