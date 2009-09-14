@@ -17,6 +17,7 @@ public class TraceGenerationActivity implements ISimActivity {
   }
 
   public void scheduleOn(Simulation sim) {
+    // only generate trace, if it doesn't exist:
     try {
       InputStream in = FileHelper.openFileOrUrl(traceFilename);
       int b = in.read();
@@ -31,6 +32,8 @@ public class TraceGenerationActivity implements ISimActivity {
     System.out.println(" Generating trace '" + traceFilename + "'... ");
     try {
       traceGenerator.generateTrace(traceFilename);
+      // allow garbage collection of generation setup:
+      traceGenerator = null;
     } catch (IOException e) {
       System.out.println(" failed.");
       System.exit(-1);
