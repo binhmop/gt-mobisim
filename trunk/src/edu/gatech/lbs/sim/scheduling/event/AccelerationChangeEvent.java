@@ -16,11 +16,11 @@ import edu.gatech.lbs.sim.agent.SimAgent;
 public class AccelerationChangeEvent extends SimEvent implements IMobilityChangeEvent {
   public static final byte typeCode = 'a';
 
-  private Simulation sim;
-  private SimAgent agent;
-  private IVector location;
-  private IVector velocity;
-  private IVector acceleration;
+  protected Simulation sim;
+  protected SimAgent agent;
+  protected IVector location;
+  protected IVector velocity;
+  protected IVector acceleration;
 
   public AccelerationChangeEvent(Simulation sim, long timestamp, SimAgent agent, IVector location, IVector velocity, IVector acceleration) {
     super(sim, timestamp);

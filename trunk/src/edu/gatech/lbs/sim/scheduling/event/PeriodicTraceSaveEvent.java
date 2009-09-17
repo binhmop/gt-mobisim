@@ -4,16 +4,16 @@
 //
 package edu.gatech.lbs.sim.scheduling.event;
 
-import edu.gatech.lbs.sim.Simulation;
-import edu.gatech.lbs.sim.agent.SimAgent;
-
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Collection;
 
+import edu.gatech.lbs.sim.Simulation;
+import edu.gatech.lbs.sim.agent.SimAgent;
+
 public class PeriodicTraceSaveEvent extends SimEvent {
-  private DataOutputStream out;
-  private double period; // [sec]
+  protected DataOutputStream out;
+  protected double period; // [sec]
 
   public PeriodicTraceSaveEvent(Simulation sim, long timestamp, double period, DataOutputStream out) {
     super(sim, timestamp);

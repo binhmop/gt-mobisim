@@ -16,8 +16,8 @@ import edu.gatech.lbs.sim.agent.SimAgent;
 public class LocationChangeEvent extends SimEvent implements IMobilityChangeEvent {
   public static final byte typeCode = 'l';
 
-  private SimAgent agent;
-  private IVector location;
+  protected SimAgent agent;
+  protected IVector location;
 
   public LocationChangeEvent(Simulation sim, long timestamp, SimAgent agent, IVector location) {
     super(sim, timestamp);
