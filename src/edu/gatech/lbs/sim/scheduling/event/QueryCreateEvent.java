@@ -4,20 +4,20 @@
 //
 package edu.gatech.lbs.sim.scheduling.event;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+
 import edu.gatech.lbs.core.query.LocationBasedQuery;
 import edu.gatech.lbs.core.query.LocationBasedQueryFactory;
 import edu.gatech.lbs.core.query.QueryKey;
 import edu.gatech.lbs.sim.Simulation;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-
 public class QueryCreateEvent extends SimEvent {
   public static final byte typeCode = 'c';
 
-  private QueryKey simKey;
-  private LocationBasedQuery query;
+  protected QueryKey simKey;
+  protected LocationBasedQuery query;
 
   public QueryCreateEvent(Simulation sim, long timestamp, QueryKey simKey, LocationBasedQuery query) {
     super(sim, timestamp);

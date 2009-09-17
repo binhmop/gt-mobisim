@@ -11,7 +11,7 @@ import java.io.IOException;
 import edu.gatech.lbs.sim.Simulation;
 
 public class TraceLoadEvent extends SimEvent {
-  private DataInputStream in;
+  protected DataInputStream in;
 
   public TraceLoadEvent(Simulation sim, long timestamp, DataInputStream in) {
     super(sim, timestamp);

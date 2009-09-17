@@ -14,7 +14,7 @@ import edu.gatech.lbs.sim.Simulation;
 public class QueryDeleteEvent extends SimEvent {
   public static final byte typeCode = 'd';
 
-  private QueryKey simKey;
+  protected QueryKey simKey;
 
   public QueryDeleteEvent(Simulation sim, long timestamp, QueryKey simKey) {
     super(sim, timestamp);
