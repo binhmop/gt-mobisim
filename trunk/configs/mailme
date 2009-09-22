@@ -1,0 +1,1 @@
+echo "To get an email when simulation is done, change contents of the 'mailme' file to this:  mail -s 'Sim done.' you@yourmail.com < /dev/null"

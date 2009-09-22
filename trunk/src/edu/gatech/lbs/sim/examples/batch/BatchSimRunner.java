@@ -162,6 +162,13 @@ public class BatchSimRunner {
 
   public static void stopHttpServer() {
     simMonitorHttpServer.server.stop(0);
+
+    try {
+      Process p = Runtime.getRuntime().exec("./mailme");
+      System.out.println("Sent email.");
+    } catch (Exception err) {
+      System.out.println("Couldn't send email.");
+    }
   }
 
   public void go(String[] args) {
