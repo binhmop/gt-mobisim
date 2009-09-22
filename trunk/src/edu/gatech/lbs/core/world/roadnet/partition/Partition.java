@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import edu.gatech.lbs.core.vector.IVector;
@@ -21,7 +22,7 @@ import edu.gatech.lbs.core.world.roadnet.RoadSegment;
 import edu.gatech.lbs.core.world.roadnet.route.Route;
 
 public class Partition {
-  protected int pid; // partition ID
+  protected int partitionId;
 
   protected List<RoadSegment> segments;
   protected HashMap<Integer, Integer> segmentMap; // segmentID --> segment-in-partition-ID mapping
@@ -36,7 +37,7 @@ public class Partition {
   protected List<RoadnetVector> borderLocations; // derived & cached locations of all border points
 
   public Partition(int pid) {
-    this.pid = pid;
+    this.partitionId = pid;
     segments = new ArrayList<RoadSegment>();
     segmentMap = new HashMap<Integer, Integer>();
     junctions = new ArrayList<RoadJunction>();
@@ -83,7 +84,7 @@ public class Partition {
   }
 
   public void saveTo(DataOutputStream out) throws IOException {
-    out.writeInt(pid);
+    out.writeInt(partitionId);
     out.writeInt(segments.size());
     for (Iterator<RoadSegment> it = segments.iterator(); it.hasNext();) {
       out.writeInt(it.next().getId());
@@ -106,7 +107,7 @@ public class Partition {
   }
 
   public int getId() {
-    return pid;
+    return partitionId;
   }
 
   public void addSegment(RoadSegment segment) {
@@ -176,7 +177,6 @@ public class Partition {
 
   /**
    * Get the locations of all border points, in coordinates where all segmentIDs are within the partition.
-   * @return
    */
   private List<RoadnetVector> getBorderLocations() {
     List<RoadnetVector> junctionLocations = new ArrayList<RoadnetVector>();
@@ -214,13 +214,10 @@ public class Partition {
   }
 
   /**
-   * Get the shortest route between the two given locations.
+   * Get the shortest route between the two given locations, using the pre-computed distances.
    * 
    * TODO: add specialized code for end-of-segment (at-junction) locations
    * 
-   * @param source
-   * @param target
-   * @return
    */
   public Route getRoute(IVector source, IVector target) {
     RoadnetVector loc0 = source.toRoadnetVector();
@@ -282,15 +279,9 @@ public class Partition {
 
   /**
    * Get route to the nearest trigger point (border point or given point of interest).
-   * 
-   * @param points
-   * @param location
-   * @return
    */
   public Route getRouteToNearestTriggerPoint(List<RoadnetVector> points, RoadnetVector location) {
-    // add border points to trigger point set:
-    List<RoadnetVector> triggers = new ArrayList<RoadnetVector>();
-    triggers.addAll(borderLocations);
+    List<RoadnetVector> triggers = new LinkedList<RoadnetVector>(borderLocations);
     triggers.addAll(points);
 
     Route minRoute = null;
