@@ -82,7 +82,12 @@ public class BoundingBox {
     return location.getX() >= x0 && location.getX() < getEastBoundary() && location.getY() >= y0 && location.getY() < getNorthBoundary();
   }
 
+  public BoundingBox clone() {
+    return new BoundingBox(x0, y0, width, height);
+  }
+
   public String toString() {
     return "x0= " + Stat.round(x0, 1) + ", y0= " + Stat.round(y0, 1) + ", width= " + Stat.round(width, 1) + " m, height = " + Stat.round(height, 1) + " m";
   }
+
 }
