@@ -101,6 +101,7 @@ public class XmlWorldConfigInterpreter implements IXmlConfigInterpreter {
 
       // show stats:
       roadmap.showStats();
+      Varz.set("roadmapLength", roadmap.getLengthTotal());
 
       // partitioning:
       NodeList nl = worldNode.getElementsByTagName("partition");
@@ -205,13 +206,14 @@ public class XmlWorldConfigInterpreter implements IXmlConfigInterpreter {
       }
 
       world = roadmap;
-    }/* else if (worldType.equalsIgnoreCase("freeform")) {
-                                        															IParamParser pparser = new DistanceParser();
-                                        															double width = pparser.parse(worldNode.getAttribute("width"));
-                                        															double height = pparser.parse(worldNode.getAttribute("height"));
-                                        															world = new BoundingBox(0, width, 0, height);
-                                        														}*/
-    else {
+      /*
+      } else if (worldType.equalsIgnoreCase("freeform")) {
+      IParamParser pparser = new DistanceParser();
+      double width = pparser.parse(worldNode.getAttribute("width"));
+      double height = pparser.parse(worldNode.getAttribute("height"));
+      world = new BoundingBox(0, width, 0, height);
+      */
+    } else {
       System.out.println("Unknown world type: " + worldType);
       System.exit(-1);
     }
