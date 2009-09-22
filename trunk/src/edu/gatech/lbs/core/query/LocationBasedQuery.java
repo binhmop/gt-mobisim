@@ -6,13 +6,12 @@ package edu.gatech.lbs.core.query;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.List;
+import java.util.Collection;
+import java.util.HashSet;
 
 public abstract class LocationBasedQuery {
-  // TODO: move these two out?
   protected QueryKey key; // this is NOT the key of the query in the simulation, but dependent on the client implementation
-
-  protected List<Integer> results; // user IDs of clients satisfying the query
+  protected HashSet<Integer> results; // userId of clients satisfying the query
 
   public void setKey(QueryKey key) {
     if (this.key == null) {
@@ -24,7 +23,7 @@ public abstract class LocationBasedQuery {
     return key;
   }
 
-  public List<Integer> getResults() {
+  public HashSet<Integer> getResults() {
     return results;
   }
 
@@ -32,20 +31,28 @@ public abstract class LocationBasedQuery {
     return results == null ? 0 : results.size();
   }
 
-  public void setResults(List<Integer> newResults) {
-    results = newResults;
+  public void setResults(Collection<Integer> newResults) {
+    results = new HashSet<Integer>(newResults);
   }
 
-  public void addResults(List<Integer> newResults) {
-    results.addAll(newResults);
+  public boolean addResult(Integer result) {
+    return results.add(result);
   }
 
-  public void addResult(Integer result) {
-    results.add(result);
+  public void addResults(Collection<Integer> newResults) {
+    if (results == null) {
+      setResults(newResults);
+    } else {
+      results.addAll(newResults);
+    }
   }
 
-  public void removeResult(Integer result) {
-    results.remove(result);
+  public boolean removeResult(Integer result) {
+    return results.remove(result);
+  }
+
+  public void removeResults(Collection<Integer> obsoleteResults) {
+    results.removeAll(obsoleteResults);
   }
 
   public abstract byte getTypeCode();
