@@ -28,7 +28,6 @@ import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import edu.gatech.lbs.core.vector.CartesianVector;
@@ -47,6 +46,7 @@ public class SimPanel extends JPanel implements ActionListener {
   protected Simulation sim;
 
   protected double metersPerPixel;
+  protected final double zoomRate = 2;
 
   protected BoundingBox bounds;
 
@@ -72,8 +72,6 @@ public class SimPanel extends JPanel implements ActionListener {
     setBorder(BorderFactory.createLineBorder(Color.black));
     setBackground(Color.WHITE);
 
-    // meter_per_pixel = 10;
-
     this.addKeyListener(new KeyAdapter() {
       public void keyReleased(KeyEvent e) {
       }
@@ -95,8 +93,16 @@ public class SimPanel extends JPanel implements ActionListener {
 
     this.addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {
-        CartesianVector loc = getLocation(bounds, e.getLocationOnScreen());
-        JOptionPane.showMessageDialog(null, e.getLocationOnScreen().x + " px, " + e.getLocationOnScreen().y + " px\n" + loc + "\n" + loc.toRoadnetVector((RoadMap) sim.getWorld()));
+        CartesianVector loc = getLocation(bounds, new Point(e.getX(), e.getY()));
+        // JOptionPane.showMessageDialog(null, e.getLocationOnScreen().x + " px, " + e.getLocationOnScreen().y + " px\n" + loc + "\n" + loc.toRoadnetVector((RoadMap) sim.getWorld()));
+        switch (e.getButton()) {
+        case MouseEvent.BUTTON1:
+          bounds = new BoundingBox(loc.getX() - (loc.getX() - bounds.getX0()) / zoomRate, loc.getY() - (loc.getY() - bounds.getY0()) / zoomRate, bounds.getWidth() / zoomRate, bounds.getHeight() / zoomRate);
+          break;
+        case MouseEvent.BUTTON3:
+          bounds = new BoundingBox(loc.getX() - (loc.getX() - bounds.getX0()) * zoomRate, loc.getY() - (loc.getY() - bounds.getY0()) * zoomRate, bounds.getWidth() * zoomRate, bounds.getHeight() * zoomRate);
+          break;
+        }
       }
     });
 
@@ -104,8 +110,6 @@ public class SimPanel extends JPanel implements ActionListener {
       // This method is called after the component's size changes
       public void componentResized(ComponentEvent evt) {
         Component c = (Component) evt.getSource();
-
-        // Get new size
         Dimension newSize = c.getSize();
       }
     });
@@ -142,7 +146,11 @@ public class SimPanel extends JPanel implements ActionListener {
     g.fillRect(0, 0, d.width, d.height);
 
     RoadMap roadmap = (RoadMap) sim.getWorld();
-    bounds = roadmap.getBounds();
+    if (bounds == null) {
+      bounds = roadmap.getBounds();
+    }
+
+    // metersPerPixel = 0.1 * Math.max(bounds.getWidth() / getWidth(), bounds.getHeight() / getHeight());
     metersPerPixel = Math.max(bounds.getWidth() / getWidth(), bounds.getHeight() / getHeight());
 
     for (IDrawer drawer : drawers) {
@@ -182,6 +190,7 @@ public class SimPanel extends JPanel implements ActionListener {
   }
 
   protected Point getPixel(BoundingBox bounds, CartesianVector vector) {
+    // return new Point((int) ((vector.getX() - bounds.getX0() - 4500) / metersPerPixel), (int) ((bounds.getNorthBoundary() - vector.getY() - 9000) / metersPerPixel));
     return new Point((int) ((vector.getX() - bounds.getX0()) / metersPerPixel), (int) ((bounds.getNorthBoundary() - vector.getY()) / metersPerPixel));
   }
 
