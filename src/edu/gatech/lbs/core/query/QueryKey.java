@@ -36,7 +36,7 @@ public class QueryKey {
   }
 
   public int hashCode() {
-    return new Integer(uid << 32 | qid).hashCode();
+    return new Integer(uid | qid << 24).hashCode();
   }
 
   public void saveTo(DataOutputStream out) throws IOException {
