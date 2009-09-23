@@ -38,7 +38,7 @@ public class ShpMapParser extends MapParser {
   // GeoTools jar dependency tree:
   // http://www.geotools.org/quickstart.html
   //
-  // For Tiger/LINE shapefile MTFCC code interpretation, see:
+  // For TIGER/Line shapefile MTFCC code interpretation, see:
   // http://www.census.gov/geo/www/tiger/cfcc_to_mtfcc.xls
   public RoadMap load(String filename, String[] roadClassNames, float[] speedLimits) {
     boolean isClassed = roadClassNames != null && speedLimits != null;
