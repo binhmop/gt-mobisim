@@ -25,6 +25,8 @@ import com.vividsolutions.jts.geom.Geometry;
 import edu.gatech.lbs.core.FileHelper;
 import edu.gatech.lbs.core.vector.CartesianVector;
 import edu.gatech.lbs.core.world.BoundingBox;
+import edu.gatech.lbs.core.world.roadnet.ClassedRoadMap;
+import edu.gatech.lbs.core.world.roadnet.ClassedRoadSegment;
 import edu.gatech.lbs.core.world.roadnet.RoadJunction;
 import edu.gatech.lbs.core.world.roadnet.RoadMap;
 import edu.gatech.lbs.core.world.roadnet.RoadSegment;
@@ -35,8 +37,17 @@ public class ShpMapParser extends MapParser {
   // http://svn.osgeo.org/geotools/trunk/demo/example/src/main/java/org/geotools/demo/FirstProject.java
   // GeoTools jar dependency tree:
   // http://www.geotools.org/quickstart.html
-  public RoadMap load(String filename) {
-    RoadMap roadmap = new RoadMap(false);
+  //
+  // For Tiger/LINE shapefile MTFCC code interpretation, see:
+  // http://www.census.gov/geo/www/tiger/cfcc_to_mtfcc.xls
+  public RoadMap load(String filename, String[] roadClassNames, float[] speedLimits) {
+    boolean isClassed = roadClassNames != null && speedLimits != null;
+    RoadMap roadmap;
+    if (isClassed) {
+      roadmap = new ClassedRoadMap(roadClassNames, speedLimits);
+    } else {
+      roadmap = new RoadMap(false);
+    }
     BoundingBox bounds = roadmap.getBounds();
     junctionMap.clear();
 
@@ -65,6 +76,16 @@ public class ShpMapParser extends MapParser {
       try {
         while (iterator.hasNext()) {
           SimpleFeature feature = iterator.next();
+
+          int roadClassIndex = -1;
+          if (isClassed) {
+            String mtfccCode = feature.getAttribute("MTFCC").toString();
+            roadClassIndex = ((ClassedRoadMap) roadmap).getRoadClassIndex(mtfccCode);
+            if (roadClassIndex < 0) {
+              continue;
+            }
+          }
+
           Geometry geometry = (Geometry) feature.getDefaultGeometry();
           Coordinate[] coords = geometry.getCoordinates();
           ArrayList<CartesianVector> points = new ArrayList<CartesianVector>();
@@ -78,7 +99,12 @@ public class ShpMapParser extends MapParser {
           // create segment:
           CartesianVector[] pointArray = new CartesianVector[points.size()];
           points.toArray(pointArray);
-          RoadSegment seg = new RoadSegment(roadmap.getNumberOfRoadSegments(), junctions[0], junctions[1], false, pointArray, Float.MAX_VALUE);
+          RoadSegment seg;
+          if (isClassed) {
+            seg = new ClassedRoadSegment(roadmap.getNextValidId(), junctions[0], junctions[1], false, pointArray, ((ClassedRoadMap) roadmap).getSpeedLimit(roadClassIndex), roadClassIndex);
+          } else {
+            seg = new RoadSegment(roadmap.getNumberOfRoadSegments(), junctions[0], junctions[1], false, pointArray, Float.MAX_VALUE);
+          }
           roadmap.addRoadSegment(seg);
 
           // connect road to junctions:

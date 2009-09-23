@@ -46,15 +46,13 @@ public class XmlWorldConfigInterpreter implements IXmlConfigInterpreter {
       Element fileNode = (Element) worldNode.getElementsByTagName("file").item(0);
       String roadmapFilename = fileNode.getAttribute("name");
 
-      System.out.print("Loading roadmap from '" + roadmapFilename + "'... ");
-      RoadMap roadmap = null;
-
-      String extension = roadmapFilename.substring(roadmapFilename.lastIndexOf('.'), roadmapFilename.length());
-      if (extension.equalsIgnoreCase(".svg")) {
-        NodeList classNodes = fileNode.getElementsByTagName("class");
-        int classCount = classNodes.getLength();
-        String[] roadClassNames = new String[classCount];
-        float[] speedLimits = new float[classCount];
+      NodeList classNodes = fileNode.getElementsByTagName("class");
+      int classCount = classNodes.getLength();
+      String[] roadClassNames = null;
+      float[] speedLimits = null;
+      if (classCount > 0) {
+        roadClassNames = new String[classCount];
+        speedLimits = new float[classCount];
         IParamParser pparser = new SpeedParser();
         for (int roadclass = 0; roadclass < classCount; roadclass++) {
           Element classNode = (Element) classNodes.item(roadclass);
@@ -62,13 +60,20 @@ public class XmlWorldConfigInterpreter implements IXmlConfigInterpreter {
           String vmax_str = classNode.getAttribute("v_max");
           speedLimits[roadclass] = vmax_str.length() > 0 ? (float) pparser.parse(vmax_str) : Float.MAX_VALUE;
         }
+      }
 
+      System.out.print("Loading roadmap from '" + roadmapFilename + "'... ");
+      RoadMap roadmap = null;
+
+      String extension = roadmapFilename.substring(roadmapFilename.lastIndexOf('.'), roadmapFilename.length());
+      if (extension.equalsIgnoreCase(".svg")) {
         SvgMapParser parser = new SvgMapParser();
         roadmap = parser.load(roadmapFilename, roadClassNames, speedLimits);
 
       } else if (extension.equalsIgnoreCase(".shp")) {
         ShpMapParser parser = new ShpMapParser();
-        roadmap = parser.load(roadmapFilename);
+        roadmap = parser.load(roadmapFilename, roadClassNames, speedLimits);
+
       } else {
         System.out.println("FAILED. Unknown roadmap file extension '" + extension + "'.");
         System.exit(-1);
