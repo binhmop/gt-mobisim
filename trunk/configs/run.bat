@@ -1,1 +1,1 @@
-java -Xmx500M -cp "../thirdparty/*.jar;../bin" edu.gatech.lbs.sim.Simulation %1
+java -Xmx500M -cp "../thirdparty/*;../bin" edu.gatech.lbs.sim.Simulation %1
