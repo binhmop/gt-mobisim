@@ -116,7 +116,7 @@ public class XmlWorldConfigInterpreter implements IXmlConfigInterpreter {
         String partitionFilename = partitionNode.getAttribute("filename");
         String overwriteAllowed = partitionNode.getAttribute("overwrite");
 
-        if (partitionFilename.isEmpty() || overwriteAllowed.equalsIgnoreCase("yes") || FileHelper.isNonEmptyFileOrUrl(partitionFilename)) {
+        if (partitionFilename.isEmpty() || overwriteAllowed.equalsIgnoreCase("yes") || !FileHelper.isNonEmptyFileOrUrl(partitionFilename)) {
           String partitionType = partitionNode.getAttribute("type");
           String radiusStr = partitionNode.getAttribute("radius");
           String seedPriorityStr = partitionNode.getAttribute("seed_priority");
