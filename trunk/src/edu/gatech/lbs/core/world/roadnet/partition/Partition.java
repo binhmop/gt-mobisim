@@ -30,14 +30,14 @@ public class Partition {
   protected List<RoadJunction> junctions;
   protected HashMap<Integer, Integer> junctionMap; // junctionID --> junction-in-partition-ID mapping
   protected boolean[] isBorderPoint; // border-points
-  protected double[][] d; // node-to-node distance table
+  protected float[][] d; // node-to-node distance table
   protected List<Integer>[][] minPath; // node-to-node shortest paths
   protected List<Boolean>[][] direction; // node-to-node shortest paths' directionality
 
   protected List<RoadnetVector> borderLocations; // derived & cached locations of all border points
 
-  public Partition(int pid) {
-    this.partitionId = pid;
+  public Partition(int partitionId) {
+    this.partitionId = partitionId;
     segments = new ArrayList<RoadSegment>();
     segmentMap = new HashMap<Integer, Integer>();
     junctions = new ArrayList<RoadJunction>();
@@ -61,20 +61,21 @@ public class Partition {
     }
 
     int n = junctions.size();
-    d = new double[n][n];
+    d = new float[n][n];
     minPath = new ArrayList[n][n];
     direction = new ArrayList[n][n];
     for (int i = 0; i < d.length; i++) {
       for (int j = 0; j < d.length; j++) {
-        d[i][j] = in.readDouble();
+        d[i][j] = in.readFloat();
         assert (d[i][j] >= 0);
 
         int pathLength = in.readInt();
         minPath[i][j] = new ArrayList<Integer>();
         direction[i][j] = new ArrayList<Boolean>();
         for (int k = 0; k < pathLength; k++) {
-          minPath[i][j].add(in.readInt());
-          direction[i][j].add(in.readBoolean());
+          int theInt = in.readInt();
+          minPath[i][j].add(Math.abs(theInt));
+          direction[i][j].add((theInt > 0));
         }
       }
     }
@@ -95,12 +96,11 @@ public class Partition {
     }
     for (int i = 0; i < d.length; i++) {
       for (int j = 0; j < d.length; j++) {
-        out.writeDouble(d[i][j]);
+        out.writeFloat(d[i][j]);
 
         out.writeInt(minPath[i][j].size());
         for (int k = 0; k < minPath[i][j].size(); k++) {
-          out.writeInt(minPath[i][j].get(k));
-          out.writeBoolean(direction[i][j].get(k));
+          out.writeInt(minPath[i][j].get(k) * (direction[i][j].get(k) ? 1 : -1));
         }
       }
     }
@@ -144,13 +144,13 @@ public class Partition {
     // precompute node-to-node distances:
     // initialize distances for Floyd-Warshall:
     int n = junctions.size();
-    d = new double[n][n];
+    d = new float[n][n];
     minPath = new ArrayList[n][n];
     direction = new ArrayList[n][n];
     // set 0-length path for self-access:
     for (int i = 0; i < junctions.size(); i++) {
       for (int j = 0; j < junctions.size(); j++) {
-        d[i][j] = Double.MAX_VALUE;
+        d[i][j] = Float.MAX_VALUE;
         minPath[i][j] = new ArrayList<Integer>();
         direction[i][j] = new ArrayList<Boolean>();
       }
