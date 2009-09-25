@@ -45,6 +45,17 @@ public class FileHelper {
     return conn.getInputStream();
   }
 
+  public static boolean isNonEmptyFileOrUrl(String urlString) {
+    try {
+      InputStream in = FileHelper.openFileOrUrl(urlString);
+      int b = in.read();
+      in.close();
+      return (b != -1);
+    } catch (IOException e) {
+      return false;
+    }
+  }
+
   public static URL getAsUrl(String urlString) throws IOException {
     try {
       return new URL(urlString);
