@@ -10,8 +10,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
-import java.util.TreeMap;
+import java.util.TreeSet;
 
 import edu.gatech.lbs.core.logging.Logz;
 import edu.gatech.lbs.core.logging.Stat;
@@ -175,7 +174,7 @@ public class RoadMap implements IWorld {
   }
 
   protected Collection<RoadJunction> getRoadJunctionsInOrder(int orderingMode) {
-    TreeMap<Double, List<RoadJunction>> juncMap = new TreeMap<Double, List<RoadJunction>>();
+    TreeSet<RoadJunctionDistance> juncSet = new TreeSet<RoadJunctionDistance>();
 
     for (RoadJunction junction : junctions) {
       double score = 0;
@@ -191,17 +190,12 @@ public class RoadMap implements IWorld {
         score = Math.random();
       }
 
-      List<RoadJunction> juncList = juncMap.get(score);
-      if (juncList == null) {
-        juncList = new LinkedList<RoadJunction>();
-        juncMap.put(score, juncList);
-      }
-      juncList.add(junction);
+      juncSet.add(new RoadJunctionDistance(junction, score));
     }
 
     List<RoadJunction> juncs = new LinkedList<RoadJunction>();
-    for (List<RoadJunction> juncList : juncMap.values()) {
-      juncs.addAll(juncList);
+    for (RoadJunctionDistance junc : juncSet) {
+      juncs.add(junc.junction);
     }
     return juncs;
   }
@@ -239,80 +233,75 @@ public class RoadMap implements IWorld {
         }
       } else {
         Partition p = new Partition(partitions.size());
-        LinkedList<RoadJunction> junctionQueue = new LinkedList<RoadJunction>();
+        TreeSet<RoadJunctionDistance> junctionQueue = new TreeSet<RoadJunctionDistance>();
         HashMap<Integer, Double> junctionDist = new HashMap<Integer, Double>(); // junctionID --> minDist
-        LinkedList<RoadJunction> borderPoints = new LinkedList<RoadJunction>(); // partition border points
+        List<RoadJunction> borderPoints = new LinkedList<RoadJunction>(); // partition border points
 
-        RoadJunction jun = juncs.poll();
-        while (junctionStatus.containsKey(jun.getId())) {
-          jun = juncs.poll();
+        RoadJunction seedJun = juncs.poll();
+        while (junctionStatus.containsKey(seedJun.getId())) {
+          seedJun = juncs.poll();
         }
         double d = 0;
-        junctionDist.put(jun.getId(), d);
+        junctionQueue.add(new RoadJunctionDistance(seedJun, d));
+        junctionDist.put(seedJun.getId(), d);
 
-        while (jun != null && (d = junctionDist.get(jun.getId())) <= partitionRadius) {
-          junctionStatus.put(jun.getId(), 1);
-          List<RoadSegment> reachableSegments = jun.getReachableRoads();
-          for (RoadSegment seg : reachableSegments) {
-            // if segment is uncovered:
-            if (!segmentStatus.containsKey(seg.getId())) {
-              segmentStatus.put(seg.getId(), p.getId());
-              p.addSegment(seg);
+        while (!junctionQueue.isEmpty()) {
+          RoadJunction jun = junctionQueue.pollFirst().junction;
+          d = junctionDist.get(jun.getId());
+          if (d <= partitionRadius) {
+            junctionStatus.put(jun.getId(), 1);
+            List<RoadSegment> reachableSegments = jun.getReachableRoads();
+            for (RoadSegment seg : reachableSegments) {
+              // if segment is uncovered:
+              if (!segmentStatus.containsKey(seg.getId())) {
+                segmentStatus.put(seg.getId(), p.getId());
+                p.addSegment(seg);
 
-              double d2 = 0;
-              switch (distanceMode) {
-              case 1:
-                d2 = d + 1; // hop; [count]
-                break;
-              case 2:
-                d2 = d + seg.getLength(); // road-distance; [m]
-                break;
-              case 3:
-                d2 = d + seg.getLength() / seg.getSpeedLimit(); // travel-distance; [sec]
-                break;
-              default:
-                Logz.println("Partitioning failed on invalid mode.");
-                System.exit(-1);
-              }
+                double d2 = 0;
+                switch (distanceMode) {
+                case 1:
+                  d2 = d + 1; // hop; [count]
+                  break;
+                case 2:
+                  d2 = d + seg.getLength(); // road-distance; [m]
+                  break;
+                case 3:
+                  d2 = d + seg.getLength() / seg.getSpeedLimit(); // travel-distance; [sec]
+                  break;
+                default:
+                  Logz.println("Partitioning failed on invalid mode.");
+                  System.exit(-1);
+                }
 
-              RoadJunction otherEnd = seg.getOtherJunction(jun);
+                RoadJunction otherEnd = seg.getOtherJunction(jun);
 
-              // if other end is already a border in another partition, it must be a border in this one too:
-              if (junctionStatus.containsKey(otherEnd.getId()) && junctionStatus.get(otherEnd.getId()) == 2) {
-                borderPoints.add(otherEnd);
-              } else {
-                // if other end is not enqueued with a shorter distance:
-                Double d3 = junctionDist.get(otherEnd.getId());
-                if (d3 == null || d2 < d3) {
-                  // add other end-junction to ordered queue:
-                  ListIterator<RoadJunction> it2 = junctionQueue.listIterator();
-                  if (!junctionQueue.isEmpty()) {
-                    while (it2.hasNext() && junctionDist.get(it2.next().getId()) < d2) {
-                    }
-                    it2.previous();
+                // if other end is already a border in another partition, it must be a border in this one too:
+                if (junctionStatus.containsKey(otherEnd.getId()) && junctionStatus.get(otherEnd.getId()) == 2) {
+                  borderPoints.add(otherEnd);
+                } else {
+                  // if other end is not enqueued with a shorter distance:
+                  Double d3 = junctionDist.get(otherEnd.getId());
+                  if (d3 == null || d2 < d3) {
+                    junctionQueue.add(new RoadJunctionDistance(otherEnd, d2));
+                    // set the shortest available distance for the other end-junction:
+                    junctionDist.put(otherEnd.getId(), d2);
+                    // mark as internal point:
+                    junctionStatus.put(otherEnd.getId(), 1);
                   }
-                  it2.add(otherEnd);
-                  // set the shortest available distance for the other end-junction:
-                  junctionDist.put(otherEnd.getId(), d2);
-                  // mark as internal point:
-                  junctionStatus.put(otherEnd.getId(), 1);
                 }
               }
-
             }
+          } else {
+            // push back over-the-range junction:
+            junctionQueue.add(new RoadJunctionDistance(jun, d));
+            break;
           }
-
-          // get next closest junction:
-          jun = junctionQueue.poll();
-        }
-        // push back over-the-range junction:
-        if (jun != null) {
-          junctionQueue.addFirst(jun);
         }
 
         // all junctions remaining in the queue are borders (too-far other-ends of in-partition segments),
         // except those that only have outlets into the current precinct:
-        for (RoadJunction roadJunction : junctionQueue) {
+        for (RoadJunctionDistance roadJunctionDist : junctionQueue) {
+          RoadJunction roadJunction = roadJunctionDist.junction;
           List<RoadSegment> reachableSegments = roadJunction.getReachableRoads();
           for (RoadSegment roadSegment : reachableSegments) {
             if (!segmentStatus.containsKey(roadSegment.getId()) || segmentStatus.get(roadSegment.getId()) != p.getId()) {
@@ -406,7 +395,7 @@ public class RoadMap implements IWorld {
   private Route getSpanningTree(RoadnetVector source, RoadnetVector target, HashMap<Integer, Double> junctionDist, HashMap<Integer, RoadSegment> previous) {
     Route route = (target != null) ? new Route(source, target) : null;
 
-    LinkedList<RoadJunction> junctionQueue = new LinkedList<RoadJunction>();
+    TreeSet<RoadJunctionDistance> junctionQueue = new TreeSet<RoadJunctionDistance>();
     junctionDist = (junctionDist != null) ? junctionDist : new HashMap<Integer, Double>(); // junctionID --> minDist
     previous = (previous != null) ? previous : new HashMap<Integer, RoadSegment>(); // junctionID --> previous-road
 
@@ -428,11 +417,7 @@ public class RoadMap implements IWorld {
       double d = (j == 0 ? source.getProgress() : sourceSeg.getLength() - source.getProgress());
 
       junctionDist.put(jun.getId(), d);
-      if (junctionQueue.isEmpty() || junctionDist.get(junctionQueue.peek().getId()) <= d) {
-        junctionQueue.addFirst(jun);
-      } else {
-        junctionQueue.addLast(jun);
-      }
+      junctionQueue.add(new RoadJunctionDistance(jun, d));
     }
 
     // indicator for reaching the two target nodes (at both ends of target segment)
@@ -441,8 +426,8 @@ public class RoadMap implements IWorld {
       reachedTargetNode[i] = false;
     }
 
-    RoadJunction jun = junctionQueue.poll();
-    while (jun != null && !(reachedTargetNode[0] && reachedTargetNode[1])) {
+    while (!junctionQueue.isEmpty() && !(reachedTargetNode[0] && reachedTargetNode[1])) {
+      RoadJunction jun = junctionQueue.pollFirst().junction;
       List<RoadSegment> reachableSegments = jun.getReachableRoads();
       for (RoadSegment segment : reachableSegments) {
         double d2 = junctionDist.get(jun.getId()) + segment.getLength(); // road-distance
@@ -451,14 +436,7 @@ public class RoadMap implements IWorld {
         // if other end is not enqueued with a shorter distance:
         Double d3 = junctionDist.get(otherEnd.getId());
         if (d3 == null || d2 < d3) {
-          // add other end-junction to ordered queue:
-          ListIterator<RoadJunction> it2 = junctionQueue.listIterator();
-          if (!junctionQueue.isEmpty()) {
-            while (it2.hasNext() && junctionDist.get(it2.next().getId()) < d2) {
-            }
-            it2.previous();
-          }
-          it2.add(otherEnd);
+          junctionQueue.add(new RoadJunctionDistance(otherEnd, d2));
           // set the shortest available distance for the other end-junction:
           junctionDist.put(otherEnd.getId(), d2);
           previous.put(otherEnd.getId(), segment);
@@ -474,9 +452,6 @@ public class RoadMap implements IWorld {
         }
 
       }
-
-      // get next closest junction:
-      jun = junctionQueue.poll();
     }
 
     if (target != null) {
