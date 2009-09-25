@@ -8,7 +8,6 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -18,6 +17,7 @@ import java.util.Collection;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import edu.gatech.lbs.core.FileHelper;
 import edu.gatech.lbs.core.logging.Stat;
 import edu.gatech.lbs.core.logging.Varz;
 import edu.gatech.lbs.core.world.IWorld;
@@ -114,26 +114,34 @@ public class XmlWorldConfigInterpreter implements IXmlConfigInterpreter {
         Collection<Partition> partitions = null;
         Element partitionNode = (Element) nl.item(0);
         String partitionFilename = partitionNode.getAttribute("filename");
-        File f = new File(partitionFilename);
-        if (!f.exists()) {
+        String overwriteAllowed = partitionNode.getAttribute("overwrite");
+
+        if (overwriteAllowed.equalsIgnoreCase("yes") || FileHelper.isNonEmptyFileOrUrl(partitionFilename)) {
           String partitionType = partitionNode.getAttribute("type");
           String radiusStr = partitionNode.getAttribute("radius");
+          String seedPriorityStr = partitionNode.getAttribute("seed_priority");
+          int seedPriorityMode;
+          if (seedPriorityStr.equalsIgnoreCase("speed")) {
+            seedPriorityMode = 1;
+          } else {
+            seedPriorityMode = 0;
+          }
           System.out.print("Partitioning roadmap using " + partitionType + " type partitioning with radius=" + radiusStr + "... ");
           long wallStartTime = System.nanoTime();
 
           if (partitionType.equalsIgnoreCase("hop")) {
             int partitionRadius = Integer.parseInt(radiusStr);
-            partitions = roadmap.makePartitions(partitionRadius, 1);
+            partitions = roadmap.makePartitions(partitionRadius, 1, seedPriorityMode);
             Varz.set("partitionRadius", partitionRadius);
           } else if (partitionType.equalsIgnoreCase("distance")) {
             IParamParser pparser = new DistanceParser();
             double partitionRadius = pparser.parse(radiusStr);
-            partitions = roadmap.makePartitions(partitionRadius, 2);
+            partitions = roadmap.makePartitions(partitionRadius, 2, seedPriorityMode);
             Varz.set("partitionRadius", partitionRadius);
           } else if (partitionType.equalsIgnoreCase("time")) {
             IParamParser pparser = new TimeParser();
             double partitionRadius = pparser.parse(radiusStr);
-            partitions = roadmap.makePartitions(partitionRadius, 3);
+            partitions = roadmap.makePartitions(partitionRadius, 3, seedPriorityMode);
             Varz.set("partitionRadius", partitionRadius);
           } else {
             System.out.println("FAILED. Unknown partitioning type '" + partitionType + "'.");

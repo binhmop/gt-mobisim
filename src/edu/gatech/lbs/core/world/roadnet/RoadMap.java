@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.TreeMap;
 
 import edu.gatech.lbs.core.logging.Logz;
 import edu.gatech.lbs.core.logging.Stat;
@@ -129,6 +130,7 @@ public class RoadMap implements IWorld {
   public static void showSegmentStats(Collection<RoadSegment> segs) {
     double lengthTotal = 0, lengthMin = Double.MAX_VALUE, lengthMax = Double.MIN_VALUE;
     int pointsTotal = 0, pointsMin = Integer.MAX_VALUE, pointsMax = Integer.MIN_VALUE;
+    double travelTimeTotal = 0;
 
     for (RoadSegment segment : segs) {
       double length = segment.getLength();
@@ -140,13 +142,16 @@ public class RoadMap implements IWorld {
       pointsTotal += points;
       pointsMin = Math.min(pointsMin, points);
       pointsMax = Math.max(pointsMax, points);
+
+      travelTimeTotal += segment.getLength() / segment.getSpeedLimit();
     }
     int segmentCount = segs.size();
     double lengthAvg = lengthTotal / (double) segmentCount;
     double pointsAvg = pointsTotal / (double) segmentCount;
-    System.out.println(" Segment totals: count= " + segmentCount + ", length= " + Stat.round(lengthTotal / 1000, 1) + " km, points= " + pointsTotal);
-    System.out.println("  length per segment: min= " + Stat.round(lengthMin, 1) + " m, avg= " + Stat.round(lengthAvg, 1) + " m, max= " + Stat.round(lengthMax, 1) + " m");
-    System.out.println("  points per segment: min= " + pointsMin + ", avg= " + Stat.round(pointsAvg, 1) + ", max= " + pointsMax + " ");
+    double travelTimeAvg = travelTimeTotal / (double) segmentCount;
+    System.out.println(" Segment totals: count= " + segmentCount + ", length= " + Stat.round(lengthTotal / 1000, 1) + " km (" + Stat.round(travelTimeTotal / 3600, 1) + " h), points= " + pointsTotal);
+    System.out.println("  length per segment: avg= " + Stat.round(lengthAvg, 1) + " m (" + Stat.round(travelTimeAvg, 1) + " sec), min= " + Stat.round(lengthMin, 1) + " m, max= " + Stat.round(lengthMax, 1) + " m");
+    System.out.println("  points per segment: avg= " + Stat.round(pointsAvg, 1) + ", min= " + pointsMin + ", max= " + pointsMax + " ");
   }
 
   public void showJunctionStats() {
@@ -169,26 +174,51 @@ public class RoadMap implements IWorld {
     System.out.println("  degree: 1-degree= " + deg1 + ", 2-degree= " + deg2 + ", avg= " + Stat.round(degAvg, 1) + ", max= " + degMax);
   }
 
+  protected Collection<RoadJunction> getRoadJunctionsInOrder(int orderingMode) {
+    TreeMap<Double, List<RoadJunction>> juncMap = new TreeMap<Double, List<RoadJunction>>();
+
+    for (RoadJunction junction : junctions) {
+      double score = 0;
+      switch (orderingMode) {
+      case 1:
+        // order by speed-thru:
+        for (RoadSegment seg : junction.getAllRoads()) {
+          score -= seg.getSpeedLimit();
+        }
+        break;
+      default:
+        // random order:
+        score = Math.random();
+      }
+
+      List<RoadJunction> juncList = juncMap.get(score);
+      if (juncList == null) {
+        juncList = new LinkedList<RoadJunction>();
+        juncMap.put(score, juncList);
+      }
+      juncList.add(junction);
+    }
+
+    List<RoadJunction> juncs = new LinkedList<RoadJunction>();
+    for (List<RoadJunction> juncList : juncMap.values()) {
+      juncs.addAll(juncList);
+    }
+    return juncs;
+  }
+
   /**
    * Partition the roadnet.
-   * 
-   * @param partitionRadius
-   * @param mode
-   * @return
    */
-  public Collection<Partition> makePartitions(double partitionRadius, int mode) {
+  public Collection<Partition> makePartitions(double partitionRadius, int distanceMode, int seedPriorityMode) {
     partitions = new ArrayList<Partition>();
 
     HashMap<Integer, Integer> segmentStatus = new HashMap<Integer, Integer>(); // segmentID --> partitionID
-    HashMap<Integer, Integer> junctionStatus = new HashMap<Integer, Integer>(); // junctionID --> partitionID
+    HashMap<Integer, Integer> junctionStatus = new HashMap<Integer, Integer>(); // junctionID --> code (1: in partition, 2: border point)
+
+    LinkedList<RoadJunction> juncs = new LinkedList<RoadJunction>(getRoadJunctionsInOrder(seedPriorityMode));
 
     // while there are uncovered segments:
     while (segmentStatus.size() < segments.size()) {
-      // find an uncovered junction:
-      int junctionIdx;
-      for (junctionIdx = (int) (Math.random() * junctions.size()); junctionStatus.size() < junctions.size() && junctionStatus.containsKey(junctions.get(junctionIdx).getId()); junctionIdx = (junctionIdx == 0) ? junctions.size() - 1 : junctionIdx - 1) {
-      }
-
       // if there are no completely uncovered junctions, only 1-segment partition(s) remain:
       if (junctionStatus.size() == junctions.size()) {
         // find all uncovered segments, and make a partition out of each:
@@ -198,7 +228,7 @@ public class RoadMap implements IWorld {
             Partition p = new Partition(partitions.size());
             RoadSegment seg = segments.get(segmentId);
             p.addSegment(seg);
-            ArrayList<RoadJunction> B = new ArrayList<RoadJunction>();
+            Collection<RoadJunction> B = new LinkedList<RoadJunction>();
             B.add(seg.startJunction);
             B.add(seg.endJunction);
             p.setBorderPoints(B);
@@ -213,13 +243,16 @@ public class RoadMap implements IWorld {
         HashMap<Integer, Double> junctionDist = new HashMap<Integer, Double>(); // junctionID --> minDist
         LinkedList<RoadJunction> borderPoints = new LinkedList<RoadJunction>(); // partition border points
 
-        RoadJunction j = junctions.get(junctionIdx);
+        RoadJunction jun = juncs.poll();
+        while (junctionStatus.containsKey(jun.getId())) {
+          jun = juncs.poll();
+        }
         double d = 0;
-        junctionDist.put(j.getId(), d);
+        junctionDist.put(jun.getId(), d);
 
-        while (j != null && (d = junctionDist.get(j.getId())) <= partitionRadius) {
-          junctionStatus.put(j.getId(), 1);
-          List<RoadSegment> reachableSegments = j.getReachableRoads();
+        while (jun != null && (d = junctionDist.get(jun.getId())) <= partitionRadius) {
+          junctionStatus.put(jun.getId(), 1);
+          List<RoadSegment> reachableSegments = jun.getReachableRoads();
           for (RoadSegment seg : reachableSegments) {
             // if segment is uncovered:
             if (!segmentStatus.containsKey(seg.getId())) {
@@ -227,7 +260,7 @@ public class RoadMap implements IWorld {
               p.addSegment(seg);
 
               double d2 = 0;
-              switch (mode) {
+              switch (distanceMode) {
               case 1:
                 d2 = d + 1; // hop; [count]
                 break;
@@ -242,7 +275,7 @@ public class RoadMap implements IWorld {
                 System.exit(-1);
               }
 
-              RoadJunction otherEnd = seg.getOtherJunction(j);
+              RoadJunction otherEnd = seg.getOtherJunction(jun);
 
               // if other end is already a border in another partition, it must be a border in this one too:
               if (junctionStatus.containsKey(otherEnd.getId()) && junctionStatus.get(otherEnd.getId()) == 2) {
@@ -270,11 +303,11 @@ public class RoadMap implements IWorld {
           }
 
           // get next closest junction:
-          j = junctionQueue.poll();
+          jun = junctionQueue.poll();
         }
         // push back over-the-range junction:
-        if (j != null) {
-          junctionQueue.addFirst(j);
+        if (jun != null) {
+          junctionQueue.addFirst(jun);
         }
 
         // all junctions remaining in the queue are borders (too-far other-ends of in-partition segments),
@@ -315,19 +348,19 @@ public class RoadMap implements IWorld {
 
   public Collection<Partition> getConnectedComponents() {
     // for undirected road networks (the result might not be correct for directed road networks)
-    return makePartitions(Double.MAX_VALUE, 1);
+    return makePartitions(Double.MAX_VALUE, 1, 0);
   }
 
   /**
    * Calculate path lengths between all node pairs.
    */
-  public static double[][] doFloydWarshall(double path[][], List<Integer>[][] minPath, List<Boolean>[][] direction) {
+  public static float[][] doFloydWarshall(float path[][], List<Integer>[][] minPath, List<Boolean>[][] direction) {
     int n = path.length;
 
     for (int k = 0; k < n; k++) {
       for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
-          double newValue = path[i][k] + path[k][j];
+          float newValue = path[i][k] + path[k][j];
           if (newValue < path[i][j]) {
             path[i][j] = newValue;
 
