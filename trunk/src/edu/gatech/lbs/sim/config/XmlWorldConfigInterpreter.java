@@ -116,7 +116,7 @@ public class XmlWorldConfigInterpreter implements IXmlConfigInterpreter {
         String partitionFilename = partitionNode.getAttribute("filename");
         String overwriteAllowed = partitionNode.getAttribute("overwrite");
 
-        if (overwriteAllowed.equalsIgnoreCase("yes") || FileHelper.isNonEmptyFileOrUrl(partitionFilename)) {
+        if (partitionFilename.isEmpty() || overwriteAllowed.equalsIgnoreCase("yes") || FileHelper.isNonEmptyFileOrUrl(partitionFilename)) {
           String partitionType = partitionNode.getAttribute("type");
           String radiusStr = partitionNode.getAttribute("radius");
           String seedPriorityStr = partitionNode.getAttribute("seed_priority");
@@ -168,17 +168,19 @@ public class XmlWorldConfigInterpreter implements IXmlConfigInterpreter {
           Varz.set("partitioningNodePairsCount", partitioningNodePairsCount);
           Varz.set("partitioningNodeStdev", partitioningNodeStdev);
 
-          System.out.print("saving... ");
-          try {
-            DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(partitionFilename)));
-            out.writeInt(partitions.size());
-            for (Partition partition : partitions) {
-              partition.saveTo(out);
+          if (!partitionFilename.isEmpty()) {
+            System.out.print("saving... ");
+            try {
+              DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(partitionFilename)));
+              out.writeInt(partitions.size());
+              for (Partition partition : partitions) {
+                partition.saveTo(out);
+              }
+              out.close();
+            } catch (IOException e) {
+              System.out.println("Unable to write partition file '" + partitionFilename + "'.");
+              System.exit(-1);
             }
-            out.close();
-          } catch (IOException e) {
-            System.out.println("Unable to write partition file '" + partitionFilename + "'.");
-            System.exit(-1);
           }
 
           System.out.println("done.");
