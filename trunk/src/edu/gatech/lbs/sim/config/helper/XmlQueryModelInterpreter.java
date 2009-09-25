@@ -33,7 +33,7 @@ public class XmlQueryModelInterpreter implements IXmlConfigInterpreter {
 
     String queryTraceFilename = querymodelNode.getAttribute("filename");
     String querymodelType = querymodelNode.getAttribute("type");
-    String overwriteMode = querymodelNode.getAttribute("overwrite");
+    String overwriteAllowed = querymodelNode.getAttribute("overwrite");
 
     if (querymodelType.equalsIgnoreCase(GlobalFixedNumberRangeQueryModel.getXmlName())) {
       String queryCountStr = querymodelNode.getAttribute("count");
@@ -65,7 +65,7 @@ public class XmlQueryModelInterpreter implements IXmlConfigInterpreter {
       System.exit(-1);
     }
 
-    sim.addActivity(new TraceGenerationActivity(queryTraceFilename, queryTraceGenerator, overwriteMode.equalsIgnoreCase("yes")));
+    sim.addActivity(new TraceGenerationActivity(queryTraceFilename, queryTraceGenerator, overwriteAllowed.equalsIgnoreCase("yes")));
     sim.addActivity(new TraceLoadingActivity(queryTraceFilename));
   }
 }
