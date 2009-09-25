@@ -10,23 +10,27 @@ import edu.gatech.lbs.sim.tracegenerator.ITraceGenerator;
 public class TraceGenerationActivity implements ISimActivity {
   protected String traceFilename;
   protected ITraceGenerator traceGenerator;
+  protected boolean isOverwriteOn;
 
-  public TraceGenerationActivity(String traceFilename, ITraceGenerator traceGenerator) {
+  public TraceGenerationActivity(String traceFilename, ITraceGenerator traceGenerator, boolean isOverwriteOn) {
     this.traceFilename = traceFilename;
     this.traceGenerator = traceGenerator;
+    this.isOverwriteOn = isOverwriteOn;
   }
 
   public void scheduleOn(Simulation sim) {
-    // only generate trace, if it doesn't exist:
-    try {
-      InputStream in = FileHelper.openFileOrUrl(traceFilename);
-      int b = in.read();
-      in.close();
-      if (b != -1) {
-        return;
+    if (!isOverwriteOn) {
+      // only generate trace, if it doesn't exist:
+      try {
+        InputStream in = FileHelper.openFileOrUrl(traceFilename);
+        int b = in.read();
+        in.close();
+        if (b != -1) {
+          return;
+        }
+      } catch (IOException e) {
+        // read failure indicates we need to go forward with the trace generation
       }
-    } catch (IOException e) {
-      // read failure indicates we need to go forward with the trace generation
     }
 
     System.out.println(" Generating trace '" + traceFilename + "'... ");

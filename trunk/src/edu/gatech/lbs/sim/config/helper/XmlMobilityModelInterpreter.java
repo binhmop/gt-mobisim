@@ -34,6 +34,7 @@ public class XmlMobilityModelInterpreter implements IXmlConfigInterpreter {
 
     String mobilityTraceFilename = mobilitymodelNode.getAttribute("filename");
     String mobilitymodelType = mobilitymodelNode.getAttribute("type");
+    String overwriteMode = mobilitymodelNode.getAttribute("overwrite");
 
     // location distribution:
     Element locationDistributionNode = (Element) mobilitymodelNode.getElementsByTagName("locationdistribution").item(0);
@@ -90,7 +91,7 @@ public class XmlMobilityModelInterpreter implements IXmlConfigInterpreter {
       System.exit(-1);
     }
 
-    sim.addActivity(new TraceGenerationActivity(mobilityTraceFilename, mobilityTraceGenerator));
+    sim.addActivity(new TraceGenerationActivity(mobilityTraceFilename, mobilityTraceGenerator, overwriteMode.equalsIgnoreCase("yes")));
     sim.addActivity(new TraceLoadingActivity(mobilityTraceFilename));
   }
 }
