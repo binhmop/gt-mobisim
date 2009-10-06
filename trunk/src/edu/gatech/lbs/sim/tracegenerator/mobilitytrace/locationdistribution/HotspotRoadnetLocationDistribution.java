@@ -10,6 +10,7 @@ import java.util.Random;
 
 import edu.gatech.lbs.core.vector.IVector;
 import edu.gatech.lbs.core.vector.RoadnetVector;
+import edu.gatech.lbs.core.world.roadnet.RoadJunctionDistance;
 import edu.gatech.lbs.core.world.roadnet.RoadMap;
 import edu.gatech.lbs.core.world.roadnet.RoadSegment;
 
@@ -43,12 +44,12 @@ public class HotspotRoadnetLocationDistribution implements ILocationDistribution
       RoadnetVector source = new RoadnetVector(centerSeg, centerSeg.getLength() / 2);
 
       // calculate hotspottyness of all segments:
-      HashMap<Integer, Double> junctionDist = new HashMap<Integer, Double>();
+      HashMap<Integer, RoadJunctionDistance> junctionDist = new HashMap<Integer, RoadJunctionDistance>();
       roadmap.getSpanningTree(source, junctionDist, null);
       double lengthAvg = roadmap.getLengthTotal() / roadmap.getRoadSegments().size();
       for (int j = 0; j < segmentCount; j++) {
         RoadSegment seg = segments[j];
-        double dist = (j == centerNum) ? 0 : Math.min(junctionDist.get(seg.getSourceJunction().getId()), junctionDist.get(seg.getTargetJunction().getId())) + seg.getLength() / 2;
+        double dist = (j == centerNum) ? 0 : Math.min(junctionDist.get(seg.getSourceJunction().getId()).distance, junctionDist.get(seg.getTargetJunction().getId()).distance) + seg.getLength() / 2;
         segmentWeights[j] += Math.pow(coeff, dist / lengthAvg);
       }
     }
