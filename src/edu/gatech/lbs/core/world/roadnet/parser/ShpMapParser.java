@@ -40,16 +40,10 @@ public class ShpMapParser extends MapParser {
   //
   // For TIGER/Line shapefile MTFCC code interpretation, see:
   // http://www.census.gov/geo/www/tiger/cfcc_to_mtfcc.xls
-  public RoadMap load(String filename, String[] roadClassNames, float[] speedLimits) {
-    boolean isClassed = roadClassNames != null && speedLimits != null;
-    RoadMap roadmap;
-    if (isClassed) {
-      roadmap = new ClassedRoadMap(roadClassNames, speedLimits);
-    } else {
-      roadmap = new RoadMap(false);
-    }
-    BoundingBox bounds = roadmap.getBounds();
+  public void load(String filename, RoadMap roadmap) {
     junctionMap.clear();
+    BoundingBox bounds = roadmap.getBounds();
+    boolean isClassed = (roadmap instanceof ClassedRoadMap);
 
     try {
       Map<String, Serializable> connectParameters = new HashMap<String, Serializable>();
@@ -106,10 +100,6 @@ public class ShpMapParser extends MapParser {
             seg = new RoadSegment(roadmap.getNumberOfRoadSegments(), junctions[0], junctions[1], false, pointArray, Float.MAX_VALUE);
           }
           roadmap.addRoadSegment(seg);
-
-          // connect road to junctions:
-          junctions[0].addOriginatingRoad(seg);
-          junctions[1].addTerminatingRoad(seg);
         }
       } finally {
         if (iterator != null) {
@@ -120,7 +110,5 @@ public class ShpMapParser extends MapParser {
       ex.printStackTrace();
       System.exit(-1);
     }
-
-    return roadmap;
   }
 }

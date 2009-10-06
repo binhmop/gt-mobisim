@@ -21,8 +21,10 @@ import edu.gatech.lbs.core.FileHelper;
 import edu.gatech.lbs.core.logging.Stat;
 import edu.gatech.lbs.core.logging.Varz;
 import edu.gatech.lbs.core.world.IWorld;
+import edu.gatech.lbs.core.world.roadnet.ClassedRoadMap;
 import edu.gatech.lbs.core.world.roadnet.RoadMap;
 import edu.gatech.lbs.core.world.roadnet.RoadSegment;
+import edu.gatech.lbs.core.world.roadnet.parser.MapParser;
 import edu.gatech.lbs.core.world.roadnet.parser.ShpMapParser;
 import edu.gatech.lbs.core.world.roadnet.parser.SvgMapParser;
 import edu.gatech.lbs.core.world.roadnet.partition.Partition;
@@ -36,6 +38,17 @@ import edu.gatech.lbs.sim.config.paramparser.TimeParser;
 public class XmlWorldConfigInterpreter implements IXmlConfigInterpreter {
 
   public static boolean doKMLmap = false;
+
+  protected RoadMap makeRoadMap(String[] roadClassNames, float[] speedLimits) {
+    boolean isClassed = roadClassNames != null && speedLimits != null;
+    RoadMap roadmap;
+    if (isClassed) {
+      roadmap = new ClassedRoadMap(roadClassNames, speedLimits);
+    } else {
+      roadmap = new RoadMap(false);
+    }
+    return roadmap;
+  }
 
   public void initFromXmlElement(Element rootNode, Simulation sim) throws IOException {
     Element worldNode = (Element) rootNode.getElementsByTagName("world").item(0);
@@ -63,21 +76,19 @@ public class XmlWorldConfigInterpreter implements IXmlConfigInterpreter {
       }
 
       System.out.print("Loading roadmap from '" + roadmapFilename + "'... ");
-      RoadMap roadmap = null;
+      RoadMap roadmap = makeRoadMap(roadClassNames, speedLimits);
+      MapParser parser = null;
 
       String extension = roadmapFilename.substring(roadmapFilename.lastIndexOf('.'), roadmapFilename.length());
       if (extension.equalsIgnoreCase(".svg")) {
-        SvgMapParser parser = new SvgMapParser();
-        roadmap = parser.load(roadmapFilename, roadClassNames, speedLimits);
-
+        parser = new SvgMapParser();
       } else if (extension.equalsIgnoreCase(".shp")) {
-        ShpMapParser parser = new ShpMapParser();
-        roadmap = parser.load(roadmapFilename, roadClassNames, speedLimits);
-
+        parser = new ShpMapParser();
       } else {
         System.out.println("FAILED. Unknown roadmap file extension '" + extension + "'.");
         System.exit(-1);
       }
+      parser.load(roadmapFilename, roadmap);
       System.out.println("done.");
 
       System.out.print("Analyzing road network graph connectivity... ");
