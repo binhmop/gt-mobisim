@@ -9,16 +9,16 @@ import java.util.List;
 
 import edu.gatech.lbs.core.vector.CartesianVector;
 import edu.gatech.lbs.core.world.roadnet.RoadJunction;
+import edu.gatech.lbs.core.world.roadnet.RoadMap;
 
-public class MapParser {
+public abstract class MapParser {
   protected HashMap<CartesianVector, RoadJunction> junctionMap;
 
   public MapParser() {
     junctionMap = new HashMap<CartesianVector, RoadJunction>();
   }
 
-  public RoadJunction[] getJunctions(List<CartesianVector> points) {
-
+  protected RoadJunction[] getJunctions(List<CartesianVector> points) {
     RoadJunction[] junctions = new RoadJunction[2];
     for (int i = 0; i < 2; i++) {
       // determine location of junction:
@@ -40,4 +40,6 @@ public class MapParser {
 
     return junctions;
   }
+
+  public abstract void load(String roadmapFilename, RoadMap roadmap);
 }

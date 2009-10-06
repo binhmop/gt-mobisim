@@ -32,13 +32,10 @@ import edu.gatech.lbs.core.world.roadnet.RoadSegment;
  * Load a classed roadmap from a GlobalMapper-exported .SVG file.
  * Currently only undirected graphs are supported.
  * 
- * @author Peter Pesti
- * 
  */
 public class SvgMapParser extends MapParser {
 
-  public RoadMap load(String filename, String[] roadClassNames, float[] speedLimits) {
-    ClassedRoadMap roadmap = new ClassedRoadMap(roadClassNames, speedLimits);
+  public void load(String filename, RoadMap roadmap) {
     junctionMap.clear();
 
     try {
@@ -51,7 +48,7 @@ public class SvgMapParser extends MapParser {
       NodeList roadNodes = gNode.getElementsByTagName("g");
       for (int i = 0; i < roadNodes.getLength(); i++) {
         Element roadNode = (Element) roadNodes.item(i);
-        int roadClassIndex = roadmap.getRoadClassIndex(roadNode.getAttribute("id"));
+        int roadClassIndex = ((ClassedRoadMap) roadmap).getRoadClassIndex(roadNode.getAttribute("id"));
 
         if (roadClassIndex != -1) {
           NodeList polylineNodes = roadNode.getElementsByTagName("polyline");
@@ -78,12 +75,8 @@ public class SvgMapParser extends MapParser {
             // for undirected graphs, only one segment is created, which can be traversed back and forth
             CartesianVector[] pointArray = new CartesianVector[points.size()];
             points.toArray(pointArray);
-            RoadSegment seg = new ClassedRoadSegment(roadmap.getNextValidId(), junctions[0], junctions[1], false, pointArray, roadmap.getSpeedLimit(roadClassIndex), roadClassIndex);
+            RoadSegment seg = new ClassedRoadSegment(roadmap.getNextValidId(), junctions[0], junctions[1], false, pointArray, ((ClassedRoadMap) roadmap).getSpeedLimit(roadClassIndex), roadClassIndex);
             roadmap.addRoadSegment(seg);
-
-            // connect road to junctions:
-            junctions[0].addOriginatingRoad(seg);
-            junctions[1].addTerminatingRoad(seg);
           }
         }
       }
@@ -105,7 +98,5 @@ public class SvgMapParser extends MapParser {
       System.out.println("ParserConfigurationException");
       System.exit(-1);
     }
-
-    return roadmap;
   }
 }
