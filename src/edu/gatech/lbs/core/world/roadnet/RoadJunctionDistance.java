@@ -17,4 +17,8 @@ public class RoadJunctionDistance implements Comparable<RoadJunctionDistance> {
     }
     return (int) Math.signum(diff);
   }
+
+  public boolean equals(RoadJunctionDistance d2) {
+    return (junction.getId() == d2.junction.getId()) && (distance == d2.distance);
+  }
 }

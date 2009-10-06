@@ -7,7 +7,6 @@ package edu.gatech.lbs.core.world.roadnet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeSet;
@@ -23,8 +22,8 @@ import edu.gatech.lbs.core.world.roadnet.route.Route;
 
 public class RoadMap implements IWorld {
   protected boolean isDirected; // is traffic-directedness meaningful for this map?
-  protected HashMap<Integer, RoadSegment> segments; // segmentID --> segment
-  protected List<RoadJunction> junctions;
+  protected HashMap<Integer, RoadSegment> segments; // segmentId --> segment
+  protected HashMap<Integer, RoadJunction> junctions; // junctionId --> junction
 
   private int highestSegmentId;
 
@@ -34,7 +33,7 @@ public class RoadMap implements IWorld {
 
   public RoadMap(boolean isDirected) {
     segments = new HashMap<Integer, RoadSegment>();
-    junctions = new ArrayList<RoadJunction>();
+    junctions = new HashMap<Integer, RoadJunction>();
 
     this.isDirected = isDirected;
 
@@ -58,20 +57,19 @@ public class RoadMap implements IWorld {
    * @return
    */
   public boolean addRoadSegment(RoadSegment segment) {
-    Integer ID = new Integer(segment.getId());
-    if (segments.containsKey(ID)) {
+    if (segments.containsKey(segment.getId())) {
       return false;
     }
 
     // store segment:
-    segments.put(ID, segment);
-    highestSegmentId = Math.max(highestSegmentId, ID);
+    segments.put(segment.getId(), segment);
+    highestSegmentId = Math.max(highestSegmentId, segment.getId());
 
     // store junctions:
     for (int i = 0; i < 2; i++) {
       RoadJunction junction = segment.getEndJunction(i);
-      if (junction.getId() >= junctions.size()) {
-        junctions.add(junction);
+      if (!junctions.containsKey(junction.getId())) {
+        junctions.put(junction.getId(), junction);
       }
     }
     return true;
@@ -102,6 +100,10 @@ public class RoadMap implements IWorld {
 
   public RoadJunction getRoadJunction(int id) {
     return junctions.get(id);
+  }
+
+  public Collection<RoadJunction> getRoadJunctions() {
+    return junctions.values();
   }
 
   public boolean isDirected() {
@@ -157,9 +159,7 @@ public class RoadMap implements IWorld {
     int deg1 = 0, deg2 = 0, degMax = Integer.MIN_VALUE;
     double degAvg = 0;
 
-    for (Iterator<RoadJunction> it = junctions.iterator(); it.hasNext();) {
-      RoadJunction junction = it.next();
-
+    for (RoadJunction junction : junctions.values()) {
       int degree = junction.getDegree();
       deg1 += degree == 1 ? 1 : 0;
       deg2 += degree == 2 ? 1 : 0;
@@ -176,7 +176,7 @@ public class RoadMap implements IWorld {
   protected Collection<RoadJunction> getRoadJunctionsInOrder(int orderingMode) {
     TreeSet<RoadJunctionDistance> juncSet = new TreeSet<RoadJunctionDistance>();
 
-    for (RoadJunction junction : junctions) {
+    for (RoadJunction junction : junctions.values()) {
       double score = 0;
       switch (orderingMode) {
       case 1:
@@ -234,7 +234,7 @@ public class RoadMap implements IWorld {
       } else {
         Partition p = new Partition(partitions.size());
         TreeSet<RoadJunctionDistance> junctionQueue = new TreeSet<RoadJunctionDistance>();
-        HashMap<Integer, Double> junctionDist = new HashMap<Integer, Double>(); // junctionID --> minDist
+        HashMap<Integer, RoadJunctionDistance> junctionDist = new HashMap<Integer, RoadJunctionDistance>(); // junctionID --> minDist
         List<RoadJunction> borderPoints = new LinkedList<RoadJunction>(); // partition border points
 
         RoadJunction seedJun = juncs.poll();
@@ -242,12 +242,13 @@ public class RoadMap implements IWorld {
           seedJun = juncs.poll();
         }
         double d = 0;
-        junctionQueue.add(new RoadJunctionDistance(seedJun, d));
-        junctionDist.put(seedJun.getId(), d);
+        RoadJunctionDistance seedDist = new RoadJunctionDistance(seedJun, d);
+        junctionQueue.add(seedDist);
+        junctionDist.put(seedJun.getId(), seedDist);
 
         while (!junctionQueue.isEmpty()) {
           RoadJunction jun = junctionQueue.pollFirst().junction;
-          d = junctionDist.get(jun.getId());
+          d = junctionDist.get(jun.getId()).distance;
           if (d <= partitionRadius) {
             junctionStatus.put(jun.getId(), 1);
             List<RoadSegment> reachableSegments = jun.getReachableRoads();
@@ -279,12 +280,16 @@ public class RoadMap implements IWorld {
                 if (junctionStatus.containsKey(otherEnd.getId()) && junctionStatus.get(otherEnd.getId()) == 2) {
                   borderPoints.add(otherEnd);
                 } else {
-                  // if other end is not enqueued with a shorter distance:
-                  Double d3 = junctionDist.get(otherEnd.getId());
-                  if (d3 == null || d2 < d3) {
-                    junctionQueue.add(new RoadJunctionDistance(otherEnd, d2));
-                    // set the shortest available distance for the other end-junction:
-                    junctionDist.put(otherEnd.getId(), d2);
+                  // set the shortest available distance for the other end-junction:
+                  RoadJunctionDistance d3 = junctionDist.get(otherEnd.getId());
+                  if (d3 == null || d2 < d3.distance) {
+                    if (d3 != null) {
+                      junctionQueue.remove(d3);
+                    }
+                    RoadJunctionDistance otherDist = new RoadJunctionDistance(otherEnd, d2);
+                    junctionQueue.add(otherDist);
+                    junctionDist.put(otherEnd.getId(), otherDist);
+
                     // mark as internal point:
                     junctionStatus.put(otherEnd.getId(), 1);
                   }
@@ -379,7 +384,7 @@ public class RoadMap implements IWorld {
     return getSpanningTree(source, target, null, null);
   }
 
-  public void getSpanningTree(RoadnetVector source, HashMap<Integer, Double> junctionDist, HashMap<Integer, RoadSegment> previous) {
+  public void getSpanningTree(RoadnetVector source, HashMap<Integer, RoadJunctionDistance> junctionDist, HashMap<Integer, RoadSegment> previous) {
     getSpanningTree(source, null, junctionDist, previous);
   }
 
@@ -392,11 +397,11 @@ public class RoadMap implements IWorld {
    * @param target
    * @return
    */
-  private Route getSpanningTree(RoadnetVector source, RoadnetVector target, HashMap<Integer, Double> junctionDist, HashMap<Integer, RoadSegment> previous) {
+  private Route getSpanningTree(RoadnetVector source, RoadnetVector target, HashMap<Integer, RoadJunctionDistance> junctionDist, HashMap<Integer, RoadSegment> previous) {
     Route route = (target != null) ? new Route(source, target) : null;
 
     TreeSet<RoadJunctionDistance> junctionQueue = new TreeSet<RoadJunctionDistance>();
-    junctionDist = (junctionDist != null) ? junctionDist : new HashMap<Integer, Double>(); // junctionID --> minDist
+    junctionDist = (junctionDist != null) ? junctionDist : new HashMap<Integer, RoadJunctionDistance>(); // junctionID --> minDist
     previous = (previous != null) ? previous : new HashMap<Integer, RoadSegment>(); // junctionID --> previous-road
 
     RoadSegment sourceSeg = source.getRoadSegment();
@@ -416,8 +421,9 @@ public class RoadMap implements IWorld {
       RoadJunction jun = sourceSeg.getEndJunction(j);
       double d = (j == 0 ? source.getProgress() : sourceSeg.getLength() - source.getProgress());
 
-      junctionDist.put(jun.getId(), d);
-      junctionQueue.add(new RoadJunctionDistance(jun, d));
+      RoadJunctionDistance otherDist = new RoadJunctionDistance(jun, d);
+      junctionQueue.add(otherDist);
+      junctionDist.put(jun.getId(), otherDist);
     }
 
     // indicator for reaching the two target nodes (at both ends of target segment)
@@ -430,15 +436,19 @@ public class RoadMap implements IWorld {
       RoadJunction jun = junctionQueue.pollFirst().junction;
       List<RoadSegment> reachableSegments = jun.getReachableRoads();
       for (RoadSegment segment : reachableSegments) {
-        double d2 = junctionDist.get(jun.getId()) + segment.getLength(); // road-distance
+        double d2 = junctionDist.get(jun.getId()).distance + segment.getLength(); // road-distance
         RoadJunction otherEnd = segment.getOtherJunction(jun);
 
-        // if other end is not enqueued with a shorter distance:
-        Double d3 = junctionDist.get(otherEnd.getId());
-        if (d3 == null || d2 < d3) {
-          junctionQueue.add(new RoadJunctionDistance(otherEnd, d2));
-          // set the shortest available distance for the other end-junction:
-          junctionDist.put(otherEnd.getId(), d2);
+        // set the shortest available distance for the other end-junction:
+        RoadJunctionDistance d3 = junctionDist.get(otherEnd.getId());
+        if (d3 == null || d2 < d3.distance) {
+          if (d3 != null) {
+            junctionQueue.remove(d3);
+          }
+          RoadJunctionDistance otherDist = new RoadJunctionDistance(otherEnd, d2);
+          junctionQueue.add(otherDist);
+          junctionDist.put(otherEnd.getId(), otherDist);
+
           previous.put(otherEnd.getId(), segment);
         }
 
@@ -456,8 +466,8 @@ public class RoadMap implements IWorld {
 
     if (target != null) {
       // decide if target is reached via junction0 or junction1 of target-segment:
-      double dist0 = reachedTargetNode[0] ? junctionDist.get(targetSeg.getEndJunction(0).getId()) + target.getProgress() : Double.MAX_VALUE;
-      double dist1 = reachedTargetNode[1] ? junctionDist.get(targetSeg.getEndJunction(1).getId()) + targetSeg.getLength() - target.getProgress() : Double.MAX_VALUE;
+      double dist0 = reachedTargetNode[0] ? junctionDist.get(targetSeg.getEndJunction(0).getId()).distance + target.getProgress() : Double.MAX_VALUE;
+      double dist1 = reachedTargetNode[1] ? junctionDist.get(targetSeg.getEndJunction(1).getId()).distance + targetSeg.getLength() - target.getProgress() : Double.MAX_VALUE;
 
       RoadJunction junction;
       if (dist0 <= dist1) {
