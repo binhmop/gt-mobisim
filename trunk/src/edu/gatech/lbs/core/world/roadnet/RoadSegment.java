@@ -27,7 +27,13 @@ public class RoadSegment {
     this.isDirected = isDirected;
     this.speedLimit = speedLimit;
 
-    geometry = new RoadSegmentGeometry(points);
+    // connect road to junctions:
+    startJunction.addOriginatingRoad(this);
+    endJunction.addTerminatingRoad(this);
+
+    if (points != null) {
+      geometry = new RoadSegmentGeometry(points);
+    }
   }
 
   public int getId() {
