@@ -94,12 +94,12 @@ public class RoadMap implements IWorld {
     }
   }
 
-  public RoadSegment getRoadSegment(int id) {
-    return segments.get(id);
+  public RoadSegment getRoadSegment(int segmentId) {
+    return segments.get(segmentId);
   }
 
-  public RoadJunction getRoadJunction(int id) {
-    return junctions.get(id);
+  public RoadJunction getRoadJunction(int junctionId) {
+    return junctions.get(junctionId);
   }
 
   public Collection<RoadJunction> getRoadJunctions() {
@@ -181,7 +181,7 @@ public class RoadMap implements IWorld {
       switch (orderingMode) {
       case 1:
         // order by speed-thru:
-        for (RoadSegment seg : junction.getAllRoads()) {
+        for (RoadSegment seg : junction.getAllRoads(true)) {
           score -= seg.getSpeedLimit();
         }
         break;

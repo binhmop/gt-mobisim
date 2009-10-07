@@ -183,7 +183,7 @@ public class Partition {
     for (int i = 0; i < isBorderPoint.length; i++) {
       if (isBorderPoint[i]) {
         RoadJunction junction = junctions.get(i);
-        Collection<RoadSegment> inRoads = junction.getAllRoads();
+        Collection<RoadSegment> inRoads = junction.getAllRoads(false);
         for (RoadSegment roadSegment : inRoads) {
           if (segmentMap.containsKey(roadSegment.getId())) {
             junctionLocations.add(roadSegment.getJunctionLocation(junction));

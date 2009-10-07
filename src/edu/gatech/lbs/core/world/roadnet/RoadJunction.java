@@ -5,6 +5,7 @@
 package edu.gatech.lbs.core.world.roadnet;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import edu.gatech.lbs.core.vector.CartesianVector;
@@ -59,10 +60,37 @@ public class RoadJunction {
     return inRoads;
   }
 
-  public List<RoadSegment> getAllRoads() {
+  public List<RoadSegment> getAllRoads(boolean isRepeatingLoops) {
+    List<RoadSegment> roads = new LinkedList<RoadSegment>(inRoads);
+    if (isRepeatingLoops) {
+      roads.addAll(outRoads);
+    } else {
+      for (RoadSegment seg : outRoads) {
+        if (!seg.isLoop()) {
+          roads.add(seg);
+        }
+      }
+    }
+    return roads;
+  }
+
+  public List<RoadSegment> getRoadsOriginatingAt(RoadJunction otherJunction) {
     List<RoadSegment> roads = new ArrayList<RoadSegment>();
-    roads.addAll(inRoads);
-    roads.addAll(outRoads);
+    for (RoadSegment seg : inRoads) {
+      if (seg.getSourceJunction() == otherJunction && !roads.contains(seg)) {
+        roads.add(seg);
+      }
+    }
+    return roads;
+  }
+
+  public List<RoadSegment> getRoadsTerminatingAt(RoadJunction otherJunction) {
+    List<RoadSegment> roads = new ArrayList<RoadSegment>();
+    for (RoadSegment seg : outRoads) {
+      if (seg.getTargetJunction() == otherJunction && !roads.contains(seg)) {
+        roads.add(seg);
+      }
+    }
     return roads;
   }
 
