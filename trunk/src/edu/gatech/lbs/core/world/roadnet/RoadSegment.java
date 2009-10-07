@@ -105,6 +105,14 @@ public class RoadSegment {
     return new RoadnetVector(this, (float) (getJunctionIndex(junction) == 0 ? 0 : getLength()));
   }
 
+  public boolean isBetween(RoadJunction j0, RoadJunction j1) {
+    return (startJunction.getId() == j0.getId() && endJunction.getId() == j1.getId()) || (!isDirected && startJunction.getId() == j1.getId() && endJunction.getId() == j0.getId());
+  }
+
+  public boolean isLoop() {
+    return startJunction.getId() == endJunction.getId();
+  }
+
   public boolean isDirected() {
     return isDirected;
   }
