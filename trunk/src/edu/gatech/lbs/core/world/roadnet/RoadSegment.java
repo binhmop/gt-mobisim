@@ -92,9 +92,9 @@ public class RoadSegment {
   }
 
   public int getJunctionIndex(RoadJunction junction) {
-    if (startJunction == junction) {
+    if (startJunction.getId() == junction.getId()) {
       return 0;
-    } else if (endJunction == junction) {
+    } else if (endJunction.getId() == junction.getId()) {
       return 1;
     } else {
       return -1;
