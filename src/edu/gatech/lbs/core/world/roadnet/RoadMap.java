@@ -426,13 +426,9 @@ public class RoadMap implements IWorld {
       junctionDist.put(jun.getId(), otherDist);
     }
 
-    // indicator for reaching the two target nodes (at both ends of target segment)
-    boolean[] reachedTargetNode = new boolean[2];
-    for (int i = 0; i < 2; i++) {
-      reachedTargetNode[i] = false;
-    }
-
-    while (!junctionQueue.isEmpty() && !(reachedTargetNode[0] && reachedTargetNode[1])) {
+    double dMin = Double.POSITIVE_INFINITY;
+    RoadJunction lastJunction = null;
+    while (!junctionQueue.isEmpty() && junctionQueue.first().distance < dMin) {
       RoadJunction jun = junctionQueue.pollFirst().junction;
       List<RoadSegment> reachableSegments = jun.getReachableRoads();
       for (RoadSegment segment : reachableSegments) {
@@ -452,11 +448,14 @@ public class RoadMap implements IWorld {
           previous.put(otherEnd.getId(), segment);
         }
 
-        // check if arrived to junctions next to target:
+        // check for possible shortest route, if arrived to a junction next to target:
         if (target != null) {
-          for (int i = 0; i < 2; i++) {
-            if (otherEnd.getId() == targetSeg.getEndJunction(i).getId()) {
-              reachedTargetNode[i] = true;
+          int idx = targetSeg.getJunctionIndex(otherEnd);
+          if (idx != -1) {
+            double dMin2 = d2 + (idx == 0 ? target.getProgress() : targetSeg.getLength() - target.getProgress());
+            if (dMin2 < dMin) {
+              dMin = dMin2;
+              lastJunction = otherEnd;
             }
           }
         }
@@ -465,20 +464,11 @@ public class RoadMap implements IWorld {
     }
 
     if (target != null) {
-      // decide if target is reached via junction0 or junction1 of target-segment:
-      double dist0 = reachedTargetNode[0] ? junctionDist.get(targetSeg.getEndJunction(0).getId()).distance + target.getProgress() : Double.MAX_VALUE;
-      double dist1 = reachedTargetNode[1] ? junctionDist.get(targetSeg.getEndJunction(1).getId()).distance + targetSeg.getLength() - target.getProgress() : Double.MAX_VALUE;
-
-      RoadJunction junction;
-      if (dist0 <= dist1) {
-        junction = targetSeg.getEndJunction(0);
-        route.addLastSegment(targetSeg, true);
-      } else {
-        junction = targetSeg.getEndJunction(1);
-        route.addLastSegment(targetSeg, false);
-      }
+      // last segment of route:
+      route.addLastSegment(targetSeg, targetSeg.getJunctionIndex(lastJunction) == 0);
 
       // collect segments of route:
+      RoadJunction junction = lastJunction;
       RoadSegment seg;
       do {
         seg = previous.get(junction.getId());
