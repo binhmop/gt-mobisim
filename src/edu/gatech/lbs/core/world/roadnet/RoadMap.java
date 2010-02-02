@@ -51,7 +51,7 @@ public class RoadMap implements IWorld {
   }
 
   /**
-   * Add a road segment, ensuring that the end-junctions are also correctly stored.
+   * Add a road segment, ensuring that the end-junctions are also correctly stored & connected.
    * 
    * @param segment
    * @return
@@ -72,6 +72,11 @@ public class RoadMap implements IWorld {
         junctions.put(junction.getId(), junction);
       }
     }
+
+    // connect road to junctions:
+    segment.getSourceJunction().addOriginatingRoad(segment);
+    segment.getTargetJunction().addTerminatingRoad(segment);
+
     return true;
   }
 
