@@ -1,4 +1,4 @@
-// Copyright (c) 2009, Georgia Tech Research Corporation
+// Copyright (c) 2012, Georgia Tech Research Corporation
 // Authors:
 //   Peter Pesti (pesti@gatech.edu)
 //
@@ -23,7 +23,6 @@ import org.xml.sax.SAXParseException;
 
 import edu.gatech.lbs.core.FileHelper;
 import edu.gatech.lbs.core.logging.Logz;
-import edu.gatech.lbs.core.logging.Stat;
 import edu.gatech.lbs.core.logging.Varz;
 import edu.gatech.lbs.core.query.LocationBasedQuery;
 import edu.gatech.lbs.core.query.QueryKey;
@@ -287,13 +286,13 @@ public class Simulation {
       eventsProcessed++;
 
       if (eventsProcessed % 1000000 == 1) {
-        Logz.println(" Queue has " + eventQueue.size() + " events, simTime= " + Stat.round(eventQueue.getNextEventTime() / (1000 * 60.0), 1) + " min, wallTime= " + Stat.round((System.nanoTime() - wallStartTime) / (1e9 * 60.0), 1) + " min");
+        Logz.println(" Queue has " + eventQueue.size() + " events, simTime= " + String.format("%.1f", eventQueue.getNextEventTime() / (1000 * 60.0)) + " min, wallTime= " + String.format("%.1f", (System.nanoTime() - wallStartTime) / (1e9 * 60.0)) + " min");
       }
     }
     Varz.set("eventsProcessed", eventsProcessed); // for the whole simulation, including warmup
     Varz.set("wallRunTime", (System.nanoTime() - wallStartTime) / 1e9); // [sec], for the whole simulation, including warmup
     double simToWallSpeedRatio = (simEndTime - simStartTime) / ((System.nanoTime() - wallStartTime) / 1e6);
-    Logz.println(" Speed: " + Stat.round(simToWallSpeedRatio, 1) + "x realtime (" + Stat.round(simToWallSpeedRatio, 1) + " simulated minutes/wall minute)");
+    Logz.println(" Speed: " + String.format("%.1f", simToWallSpeedRatio) + "x realtime (" + String.format("%.1f", simToWallSpeedRatio) + " simulated minutes/wall minute)");
     Logz.println("DONE.");
 
     Varz.set("simRunTime", (simEndTime - simStartTime - simWarmupDuration) / 1000.0); // [sec], without warmup

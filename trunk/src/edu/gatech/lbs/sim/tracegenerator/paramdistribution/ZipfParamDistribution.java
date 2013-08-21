@@ -1,4 +1,4 @@
-// Copyright (c) 2009, Georgia Tech Research Corporation
+// Copyright (c) 2012, Georgia Tech Research Corporation
 // Authors:
 //   Bugra Gedik
 //   Peter Pesti (pesti@gatech.edu)
@@ -53,7 +53,7 @@ public class ZipfParamDistribution implements IParamDistribution {
     return mean;
   }
 
-  public double getNextValue(IVector location) {
+  public int getNextValue(IVector location) {
     double v = Math.random();
     for (int i = 0; i < n; i++) {
       if (v < p[i]) {

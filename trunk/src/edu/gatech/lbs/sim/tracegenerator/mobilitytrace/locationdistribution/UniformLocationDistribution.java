@@ -1,4 +1,4 @@
-// Copyright (c) 2009, Georgia Tech Research Corporation
+// Copyright (c) 2012, Georgia Tech Research Corporation
 // Authors:
 //   Peter Pesti (pesti@gatech.edu)
 //
@@ -18,6 +18,6 @@ public class UniformLocationDistribution implements ILocationDistribution {
   }
 
   public IVector getNextLocation() {
-    return new CartesianVector(worldBox.getWestBoundary() + Math.random() * (worldBox.getWidth()), worldBox.getSouthBoundary() + Math.random() * (worldBox.getHeight()));
+    return new CartesianVector((long) (worldBox.getWestBoundary() + Math.random() * worldBox.getWidth()), (long) (worldBox.getSouthBoundary() + Math.random() * worldBox.getHeight()));
   }
 }

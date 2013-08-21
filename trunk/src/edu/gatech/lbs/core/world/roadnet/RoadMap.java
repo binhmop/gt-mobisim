@@ -1,4 +1,4 @@
-// Copyright (c) 2009, Georgia Tech Research Corporation
+// Copyright (c) 2012, Georgia Tech Research Corporation
 // Authors:
 //   Peter Pesti (pesti@gatech.edu)
 //
@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.TreeSet;
 
 import edu.gatech.lbs.core.logging.Logz;
-import edu.gatech.lbs.core.logging.Stat;
 import edu.gatech.lbs.core.vector.CartesianVector;
 import edu.gatech.lbs.core.vector.RoadnetVector;
 import edu.gatech.lbs.core.world.BoundingBox;
@@ -42,7 +41,7 @@ public class RoadMap implements IWorld {
     bounds = new BoundingBox();
   }
 
-  public int getNumberOfRoadSegments() {
+  public int getRoadSegmentCount() {
     return segments.size();
   }
 
@@ -115,12 +114,12 @@ public class RoadMap implements IWorld {
     return isDirected;
   }
 
-  public int getNextValidId() {
+  public int getNextSegmentId() {
     return highestSegmentId + 1;
   }
 
-  public double getLengthTotal() {
-    double lengthTotal = 0;
+  public long getLengthTotal() {
+    long lengthTotal = 0;
     for (RoadSegment segment : segments.values()) {
       lengthTotal += segment.getLength();
     }
@@ -139,7 +138,7 @@ public class RoadMap implements IWorld {
     double travelTimeTotal = 0;
 
     for (RoadSegment segment : segs) {
-      double length = segment.getLength();
+      double length = segment.getLength() / 1000.0;
       lengthTotal += length;
       lengthMin = Math.min(lengthMin, length);
       lengthMax = Math.max(lengthMax, length);
@@ -149,15 +148,15 @@ public class RoadMap implements IWorld {
       pointsMin = Math.min(pointsMin, points);
       pointsMax = Math.max(pointsMax, points);
 
-      travelTimeTotal += segment.getLength() / segment.getSpeedLimit();
+      travelTimeTotal += segment.getLength() / (double) segment.getSpeedLimit();
     }
     int segmentCount = segs.size();
     double lengthAvg = lengthTotal / (double) segmentCount;
     double pointsAvg = pointsTotal / (double) segmentCount;
     double travelTimeAvg = travelTimeTotal / (double) segmentCount;
-    System.out.println(" Segment totals: count= " + segmentCount + ", length= " + Stat.round(lengthTotal / 1000, 1) + " km (" + Stat.round(travelTimeTotal / 3600, 1) + " h), points= " + pointsTotal);
-    System.out.println("  length per segment: avg= " + Stat.round(lengthAvg, 1) + " m (" + Stat.round(travelTimeAvg, 1) + " sec), min= " + Stat.round(lengthMin, 1) + " m, max= " + Stat.round(lengthMax, 1) + " m");
-    System.out.println("  points per segment: avg= " + Stat.round(pointsAvg, 1) + ", min= " + pointsMin + ", max= " + pointsMax + " ");
+    System.out.println(" Segment totals: count= " + segmentCount + ", length= " + String.format("%.1f", lengthTotal / 1000) + " km (" + String.format("%.1f", travelTimeTotal / 3600) + " h), points= " + pointsTotal);
+    System.out.println("  length per segment: avg= " + String.format("%.1f", lengthAvg) + " m (" + String.format("%.1f", travelTimeAvg) + " sec), min= " + String.format("%.1f", lengthMin) + " m, max= " + String.format("%.1f", lengthMax) + " m");
+    System.out.println("  points per segment: avg= " + String.format("%.1f", pointsAvg) + ", min= " + pointsMin + ", max= " + pointsMax + " ");
   }
 
   public void showJunctionStats() {
@@ -175,14 +174,14 @@ public class RoadMap implements IWorld {
     degAvg /= (double) junctionCount;
 
     System.out.println(" Junctions: count= " + junctionCount);
-    System.out.println("  degree: 1-degree= " + deg1 + ", 2-degree= " + deg2 + ", avg= " + Stat.round(degAvg, 1) + ", max= " + degMax);
+    System.out.println("  degree: 1-degree= " + deg1 + ", 2-degree= " + deg2 + ", avg= " + String.format("%.1f", degAvg) + ", max= " + degMax);
   }
 
   protected Collection<RoadJunction> getRoadJunctionsInOrder(int orderingMode) {
     TreeSet<RoadJunctionDistance> juncSet = new TreeSet<RoadJunctionDistance>();
 
     for (RoadJunction junction : junctions.values()) {
-      double score = 0;
+      int score = 0;
       switch (orderingMode) {
       case 1:
         // order by speed-thru:
@@ -192,7 +191,7 @@ public class RoadMap implements IWorld {
         break;
       default:
         // random order:
-        score = Math.random();
+        score = (int) (1e6 * Math.random());
       }
 
       juncSet.add(new RoadJunctionDistance(junction, score));
@@ -208,7 +207,7 @@ public class RoadMap implements IWorld {
   /**
    * Partition the roadnet.
    */
-  public Collection<Partition> makePartitions(double partitionRadius, int distanceMode, int seedPriorityMode) {
+  public Collection<Partition> makePartitions(int partitionRadius, int distanceMode, int seedPriorityMode) {
     partitions = new ArrayList<Partition>();
 
     HashMap<Integer, Integer> segmentStatus = new HashMap<Integer, Integer>(); // segmentID --> partitionID
@@ -221,20 +220,20 @@ public class RoadMap implements IWorld {
       // if there are no completely uncovered junctions, only 1-segment partition(s) remain:
       if (junctionStatus.size() == junctions.size()) {
         // find all uncovered segments, and make a partition out of each:
-        for (int segmentId = 0; segmentStatus.size() < segments.size(); segmentId++) {
-          // if this is a real segment's ID, and it is uncovered:
-          if (segments.containsKey(segmentId) && !segmentStatus.containsKey(segmentId)) {
-            Partition p = new Partition(partitions.size());
-            RoadSegment seg = segments.get(segmentId);
-            p.addSegment(seg);
-            Collection<RoadJunction> B = new LinkedList<RoadJunction>();
-            B.add(seg.startJunction);
-            B.add(seg.endJunction);
-            p.setBorderPoints(B);
-            partitions.add(p);
-
-            segmentStatus.put(segmentId, p.getId());
+        for (Integer segmentId : segments.keySet()) {
+          if (segmentStatus.containsKey(segmentId)) {
+            continue;
           }
+          Partition p = new Partition(partitions.size());
+          RoadSegment seg = segments.get(segmentId);
+          p.addSegment(seg);
+          Collection<RoadJunction> B = new LinkedList<RoadJunction>();
+          B.add(seg.startJunction);
+          B.add(seg.endJunction);
+          p.setBorderPoints(B);
+          partitions.add(p);
+
+          segmentStatus.put(segmentId, p.getId());
         }
       } else {
         Partition p = new Partition(partitions.size());
@@ -246,7 +245,7 @@ public class RoadMap implements IWorld {
         while (junctionStatus.containsKey(seedJun.getId())) {
           seedJun = juncs.poll();
         }
-        double d = 0;
+        int d = 0;
         RoadJunctionDistance seedDist = new RoadJunctionDistance(seedJun, d);
         junctionQueue.add(seedDist);
         junctionDist.put(seedJun.getId(), seedDist);
@@ -263,16 +262,16 @@ public class RoadMap implements IWorld {
                 segmentStatus.put(seg.getId(), p.getId());
                 p.addSegment(seg);
 
-                double d2 = 0;
+                int d2 = 0;
                 switch (distanceMode) {
                 case 1:
                   d2 = d + 1; // hop; [count]
                   break;
                 case 2:
-                  d2 = d + seg.getLength(); // road-distance; [m]
+                  d2 = d + seg.getLength(); // road-distance; [mm]
                   break;
                 case 3:
-                  d2 = d + seg.getLength() / seg.getSpeedLimit(); // travel-distance; [sec]
+                  d2 = d + 1000 * (int) ((double) seg.getLength() / seg.getSpeedLimit()); // travel-distance; [ms]
                   break;
                 default:
                   Logz.println("Partitioning failed on invalid mode.");
@@ -326,7 +325,7 @@ public class RoadMap implements IWorld {
         }
 
         // don't bother with border-points (& distance pre-calculation), when looking for connected components:
-        if (partitionRadius < Double.MAX_VALUE) {
+        if (partitionRadius < Integer.MAX_VALUE) {
           p.setBorderPoints(borderPoints);
         }
         partitions.add(p);
@@ -347,20 +346,20 @@ public class RoadMap implements IWorld {
 
   public Collection<Partition> getConnectedComponents() {
     // for undirected road networks (the result might not be correct for directed road networks)
-    return makePartitions(Double.MAX_VALUE, 1, 0);
+    return makePartitions(Integer.MAX_VALUE, 1, 0);
   }
 
   /**
    * Calculate path lengths between all node pairs.
    */
-  public static float[][] doFloydWarshall(float path[][], List<Integer>[][] minPath, List<Boolean>[][] direction) {
+  public static int[][] doFloydWarshall(int path[][], List<Integer>[][] minPath, List<Boolean>[][] direction) {
     int n = path.length;
 
     for (int k = 0; k < n; k++) {
       for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
-          float newValue = path[i][k] + path[k][j];
-          if (newValue < path[i][j]) {
+          int newValue = path[i][k] + path[k][j];
+          if (newValue >= 0 && newValue < path[i][j]) {
             path[i][j] = newValue;
 
             minPath[i][j].clear();
@@ -424,20 +423,20 @@ public class RoadMap implements IWorld {
     // expand to two ends of current segment:
     for (int j = 0; j == 0 || (j == 1 && !sourceSeg.isDirected()); j++) {
       RoadJunction jun = sourceSeg.getEndJunction(j);
-      double d = (j == 0 ? source.getProgress() : sourceSeg.getLength() - source.getProgress());
+      int d = (j == 0 ? source.getProgress() : sourceSeg.getLength() - source.getProgress());
 
       RoadJunctionDistance otherDist = new RoadJunctionDistance(jun, d);
       junctionQueue.add(otherDist);
       junctionDist.put(jun.getId(), otherDist);
     }
 
-    double dMin = Double.POSITIVE_INFINITY;
+    int dMin = Integer.MAX_VALUE;
     RoadJunction lastJunction = null;
     while (!junctionQueue.isEmpty() && junctionQueue.first().distance < dMin) {
       RoadJunction jun = junctionQueue.pollFirst().junction;
       List<RoadSegment> reachableSegments = jun.getReachableRoads();
       for (RoadSegment segment : reachableSegments) {
-        double d2 = junctionDist.get(jun.getId()).distance + segment.getLength(); // road-distance
+        int d2 = junctionDist.get(jun.getId()).distance + segment.getLength(); // road-distance
         RoadJunction otherEnd = segment.getOtherJunction(jun);
 
         // set the shortest available distance for the other end-junction:
@@ -457,7 +456,7 @@ public class RoadMap implements IWorld {
         if (target != null) {
           int idx = targetSeg.getJunctionIndex(otherEnd);
           if (idx != -1) {
-            double dMin2 = d2 + (idx == 0 ? target.getProgress() : targetSeg.getLength() - target.getProgress());
+            int dMin2 = d2 + (idx == 0 ? target.getProgress() : targetSeg.getLength() - target.getProgress());
             if (dMin2 < dMin) {
               dMin = dMin2;
               lastJunction = otherEnd;
@@ -496,11 +495,11 @@ public class RoadMap implements IWorld {
 
   // TODO: use an index
   public RoadnetVector getRoadnetLocation(CartesianVector v) {
-    double minDist = -1;
+    long minDist = -1;
     RoadnetVector minVector = null;
     for (RoadSegment segment : segments.values()) {
       RoadnetVector vv = segment.getRoadnetLocation(v);
-      double dist = vv.toCartesianVector().vectorTo(v).getLength();
+      long dist = vv.toCartesianVector().vectorTo(v).getLength();
       if (minDist < 0 || dist < minDist) {
         minDist = dist;
         minVector = vv;

@@ -1,4 +1,4 @@
-// Copyright (c) 2009, Georgia Tech Research Corporation
+// Copyright (c) 2012, Georgia Tech Research Corporation
 // Authors:
 //   Peter Pesti (pesti@gatech.edu)
 //
@@ -59,6 +59,6 @@ public class UniformRoadnetLocationDistribution implements ILocationDistribution
       seg = it.next();
     }
 
-    return new RoadnetVector(seg, (float) (rnd.nextDouble() * seg.getLength()));
+    return new RoadnetVector(seg, (int) (rnd.nextDouble() * seg.getLength()));
   }
 }

@@ -1,4 +1,4 @@
-// Copyright (c) 2009, Georgia Tech Research Corporation
+// Copyright (c) 2012, Georgia Tech Research Corporation
 // Authors:
 //   Peter Pesti (pesti@gatech.edu)
 //
@@ -23,7 +23,7 @@ public class ExamplePeriodicLocations {
     }
 
     String configFilename = args[0];
-    long period = (long) (new TimeParser().parse(args[1]) * 1000); // [ms]
+    long period = new TimeParser().parse(args[1]); // [ms]
     int simAgentId = Integer.parseInt(args[2]);
 
     Simulation sim = new Simulation();
@@ -36,7 +36,7 @@ public class ExamplePeriodicLocations {
 
       System.out.println("Agent #" + agent.getSimAgentId() + " at t= " + t + " ms:");
       System.out.println("  location vector: " + agent.getLocation().toCartesianVector());
-      System.out.println("  velocity vector: " + agent.getLocation().toRoadnetVector().toTangentVector().times(agent.getVelocity().getLength()).toCartesianVector());
+      System.out.println("  velocity vector: " + agent.getLocation().toRoadnetVector().toTangentVector().times(1e-6 * agent.getVelocity().getLength()).toCartesianVector());
 
     }
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2009, Georgia Tech Research Corporation
+// Copyright (c) 2012, Georgia Tech Research Corporation
 // Authors:
 //   Peter Pesti (pesti@gatech.edu)
 //
@@ -66,7 +66,7 @@ public class ShpMapParser extends MapParser {
       FeatureCollection<SimpleFeatureType, SimpleFeature> collection = featureSource.getFeatures();
       FeatureIterator<SimpleFeature> iterator = collection.features();
 
-      double unit = 1000 * 40075 / 360; // [m/degree]
+      double unit = 1e6 * 40075 / 360; // [mm/degree]
       try {
         while (iterator.hasNext()) {
           SimpleFeature feature = iterator.next();
@@ -84,7 +84,7 @@ public class ShpMapParser extends MapParser {
           Coordinate[] coords = geometry.getCoordinates();
           ArrayList<CartesianVector> points = new ArrayList<CartesianVector>();
           for (int i = 0; i < coords.length; i++) {
-            CartesianVector loc = new CartesianVector(coords[i].x * unit, coords[i].y * unit);
+            CartesianVector loc = new CartesianVector((long) (coords[i].x * unit), (long) (coords[i].y * unit));
             points.add(loc);
             bounds.includePoint(loc.getX(), loc.getY());
           }
@@ -95,9 +95,9 @@ public class ShpMapParser extends MapParser {
           points.toArray(pointArray);
           RoadSegment seg;
           if (isClassed) {
-            seg = new ClassedRoadSegment(roadmap.getNextValidId(), junctions[0], junctions[1], false, pointArray, ((ClassedRoadMap) roadmap).getSpeedLimit(roadClassIndex), roadClassIndex);
+            seg = new ClassedRoadSegment(roadmap.getNextSegmentId(), junctions[0], junctions[1], false, pointArray, ((ClassedRoadMap) roadmap).getSpeedLimit(roadClassIndex), roadClassIndex);
           } else {
-            seg = new RoadSegment(roadmap.getNumberOfRoadSegments(), junctions[0], junctions[1], false, pointArray, Float.MAX_VALUE);
+            seg = new RoadSegment(roadmap.getNextSegmentId(), junctions[0], junctions[1], false, pointArray, Integer.MAX_VALUE);
           }
           roadmap.addRoadSegment(seg);
         }

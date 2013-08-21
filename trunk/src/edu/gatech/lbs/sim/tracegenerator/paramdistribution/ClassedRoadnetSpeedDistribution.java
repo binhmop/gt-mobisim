@@ -1,4 +1,4 @@
-// Copyright (c) 2009, Georgia Tech Research Corporation
+// Copyright (c) 2012, Georgia Tech Research Corporation
 // Authors:
 //   Peter Pesti (pesti@gatech.edu)
 //
@@ -23,13 +23,13 @@ public class ClassedRoadnetSpeedDistribution implements IParamDistribution {
     rnd = new Random();
   }
 
-  public double getNextValue(IVector location) {
+  public int getNextValue(IVector location) {
     RoadnetVector roadnetLocation = (RoadnetVector) location;
     ClassedRoadSegment roadsegment = (ClassedRoadSegment) roadnetLocation.getRoadSegment();
 
     int roadClass = roadsegment.getRoadClassIndex();
 
-    double speed;
+    int speed;
     do {
       speed = speedDistributions[roadClass].getNextValue(location);
     } while (speed <= 0 || speed > roadsegment.getSpeedLimit());

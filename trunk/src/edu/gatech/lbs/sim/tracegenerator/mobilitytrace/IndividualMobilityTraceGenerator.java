@@ -1,4 +1,4 @@
-// Copyright (c) 2009, Georgia Tech Research Corporation
+// Copyright (c) 2012, Georgia Tech Research Corporation
 // Authors:
 //   Peter Pesti (pesti@gatech.edu)
 //
@@ -10,7 +10,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 
-import edu.gatech.lbs.core.logging.Stat;
 import edu.gatech.lbs.sim.scheduling.SimEventQueue;
 import edu.gatech.lbs.sim.scheduling.event.SimEvent;
 import edu.gatech.lbs.sim.tracegenerator.ITraceGenerator;
@@ -83,7 +82,7 @@ public class IndividualMobilityTraceGenerator implements ITraceGenerator {
       eventCount += queue.size();
       queue.saveTo(out);
 
-      System.out.println("  " + Stat.round(simStageEndTime / 60.0 / 1000, 2) + " simulated minutes elapsed...");
+      System.out.println("  " + String.format("%.2f", simStageEndTime / 60.0 / 1000) + " simulated minutes elapsed...");
 
       // terminate if stage end is also simulation end:
       if (simStageEndTime == simEndTime) {
@@ -92,9 +91,9 @@ public class IndividualMobilityTraceGenerator implements ITraceGenerator {
     }
 
     double simSeconds = (simEndTime - simStartTime) / (1000.0);
-    System.out.println("  done. (" + eventCount + " trace records, " + Stat.round(simSeconds / ((double) eventCount / mobilityModels.size()), 2) + " simulated seconds/trace record)");
+    System.out.println("  done. (" + eventCount + " trace records, " + String.format("%.2f", simSeconds / ((double) eventCount / mobilityModels.size())) + " simulated seconds/trace record)");
     double simToWallSpeedRatio = (simEndTime - simStartTime) / ((System.nanoTime() - wallStartTime) / 1e6);
-    System.out.println("  Speed: " + Stat.round(simToWallSpeedRatio, 1) + "x realtime (" + Stat.round(simToWallSpeedRatio / 60.0, 1) + " simulated hours/wall minute)");
+    System.out.println("  Speed: " + String.format("%.1f", simToWallSpeedRatio) + "x realtime (" + String.format("%.1f", simToWallSpeedRatio / 60.0) + " simulated hours/wall minute)");
     out.close();
   }
 

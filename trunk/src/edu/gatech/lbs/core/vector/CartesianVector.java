@@ -1,4 +1,4 @@
-// Copyright (c) 2009, Georgia Tech Research Corporation
+// Copyright (c) 2012, Georgia Tech Research Corporation
 // Authors:
 //   Peter Pesti (pesti@gatech.edu)
 //
@@ -8,16 +8,15 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-import edu.gatech.lbs.core.logging.Stat;
 import edu.gatech.lbs.core.world.roadnet.RoadMap;
 
 public class CartesianVector implements IVector {
   public static final byte typeCode = 'f';
 
-  private double x; // [m], [m/s], [m/s^2]
-  private double y; // [m], [m/s], [m/s^2]
+  protected long x; // [mm], [mm/s], [mm/s^2]
+  protected long y; // [mm], [mm/s], [mm/s^2]
 
-  public CartesianVector(double x, double y) {
+  public CartesianVector(long x, long y) {
     this.x = x;
     this.y = y;
   }
@@ -28,11 +27,11 @@ public class CartesianVector implements IVector {
   }*/
 
   public CartesianVector(DataInputStream in) throws IOException {
-    x = in.readDouble();
-    y = in.readDouble();
+    x = in.readLong();
+    y = in.readLong();
   }
 
-  public void setDimension(int d, double v) {
+  public void setDimension(int d, long v) {
     switch (d) {
     case 0:
       x = v;
@@ -46,7 +45,7 @@ public class CartesianVector implements IVector {
     }
   }
 
-  public double getDimension(int d) {
+  public long getDimension(int d) {
     switch (d) {
     case 0:
       return x;
@@ -59,17 +58,17 @@ public class CartesianVector implements IVector {
     }
   }
 
-  public void setLength(double length) {
-    double phi = Math.atan2(y, x);
-    y = Math.sin(phi) * length;
-    x = Math.cos(phi) * length;
+  public void setLength(int length) {
+    double theta = Math.atan2(y, x);
+    y = (long) (Math.sin(theta) * length);
+    x = (long) (Math.cos(theta) * length);
   }
 
-  public double getX() {
+  public long getX() {
     return x;
   }
 
-  public double getY() {
+  public long getY() {
     return y;
   }
 
@@ -79,14 +78,13 @@ public class CartesianVector implements IVector {
     double lat = getLatitude();
     double a = 6378137; // [m]
     double b = 6356752.3; // [m]
-    double piOver180 = 3.14159265 / 180;
-    double aa = Math.pow(a * Math.cos(lat * piOver180), 2);
-    double bb = Math.pow(b * Math.sin(lat * piOver180), 2);
-    return x / (piOver180 * Math.cos(lat * piOver180) * Math.sqrt((a * a * aa + b * b * bb) / (aa + bb)));
+    double aa = Math.pow(a * Math.cos(lat * Math.PI / 180), 2);
+    double bb = Math.pow(b * Math.sin(lat * Math.PI / 180), 2);
+    return (x / 1000.0) / (Math.PI / 180 * Math.cos(lat * Math.PI / 180) * Math.sqrt((a * a * aa + b * b * bb) / (aa + bb)));
   }
 
   public double getLatitude() { // North-South
-    return y / 110574.2727;
+    return (y / 1000.0) / 110574.2727;
   }
 
   public IVector times(double d) {
@@ -111,10 +109,12 @@ public class CartesianVector implements IVector {
     return new CartesianVector(vv.getX() - x, vv.getY() - y);
   }
 
+  @Override
   public String toString() {
-    return "(" + Stat.round(x, 1) + "m, " + Stat.round(y, 1) + "m)";
+    return "(" + String.format("%.1f m", x / 1000.0) + ", " + String.format("%.1f m", y / 1000.0) + ")";
   }
 
+  @Override
   public boolean equals(Object o) {
     if (o instanceof CartesianVector) {
       CartesianVector v = (CartesianVector) o;
@@ -123,16 +123,30 @@ public class CartesianVector implements IVector {
     return false;
   }
 
+  @Override
   public int hashCode() {
-    Double xx = new Double(x);
-    Double yy = new Double(y);
+    Long xx = new Long(x);
+    Long yy = new Long(y);
     return xx.hashCode() ^ yy.hashCode();
   }
 
-  public double getLength() {
-    return Math.sqrt(x * x + y * y);
+  public long getLength() {
+    return (long) Math.sqrt(x * x + y * y);
   }
 
+  public double getThetaRadians() {
+    double theta = Math.atan2(y, x);
+    return theta >= 0 ? theta : 2 * Math.PI + theta;
+  }
+
+  public double getEnclosedRadians(IVector v) {
+    assert (v instanceof CartesianVector);
+
+    CartesianVector vv = (CartesianVector) v;
+    return Math.acos(x * vv.x + y * vv.y);
+  }
+
+  @Override
   public IVector clone() {
     return new CartesianVector(x, y);
   }
@@ -152,8 +166,8 @@ public class CartesianVector implements IVector {
 
   public void saveTo(DataOutputStream out) throws IOException {
     out.writeByte(typeCode);
-    out.writeDouble(x);
-    out.writeDouble(y);
+    out.writeLong(x);
+    out.writeLong(y);
   }
 
   public byte getTypeCode() {

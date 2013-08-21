@@ -1,4 +1,4 @@
-// Copyright (c) 2009, Georgia Tech Research Corporation
+// Copyright (c) 2012, Georgia Tech Research Corporation
 // Authors:
 //   Peter Pesti (pesti@gatech.edu)
 //
@@ -18,7 +18,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import edu.gatech.lbs.core.FileHelper;
-import edu.gatech.lbs.core.logging.Stat;
 import edu.gatech.lbs.core.logging.Varz;
 import edu.gatech.lbs.core.world.IWorld;
 import edu.gatech.lbs.core.world.roadnet.ClassedRoadMap;
@@ -39,7 +38,7 @@ public class XmlWorldConfigInterpreter implements IXmlConfigInterpreter {
 
   public static boolean doKMLmap = false;
 
-  protected RoadMap makeRoadMap(String[] roadClassNames, float[] speedLimits) {
+  protected RoadMap makeRoadMap(String[] roadClassNames, int[] speedLimits) {
     boolean isClassed = roadClassNames != null && speedLimits != null;
     RoadMap roadmap;
     if (isClassed) {
@@ -62,16 +61,16 @@ public class XmlWorldConfigInterpreter implements IXmlConfigInterpreter {
       NodeList classNodes = fileNode.getElementsByTagName("class");
       int classCount = classNodes.getLength();
       String[] roadClassNames = null;
-      float[] speedLimits = null;
+      int[] speedLimits = null;
       if (classCount > 0) {
         roadClassNames = new String[classCount];
-        speedLimits = new float[classCount];
+        speedLimits = new int[classCount];
         IParamParser pparser = new SpeedParser();
         for (int roadclass = 0; roadclass < classCount; roadclass++) {
           Element classNode = (Element) classNodes.item(roadclass);
           roadClassNames[roadclass] = classNode.getAttribute("name");
           String vmax_str = classNode.getAttribute("v_max");
-          speedLimits[roadclass] = vmax_str.length() > 0 ? (float) pparser.parse(vmax_str) : Float.MAX_VALUE;
+          speedLimits[roadclass] = vmax_str.length() > 0 ? pparser.parse(vmax_str) : Integer.MAX_VALUE;
         }
       }
 
@@ -117,7 +116,7 @@ public class XmlWorldConfigInterpreter implements IXmlConfigInterpreter {
 
       // show stats:
       roadmap.showStats();
-      Varz.set("roadmapLength", roadmap.getLengthTotal());
+      Varz.set("roadmapLength", roadmap.getLengthTotal() / 1000.0);
 
       // partitioning:
       NodeList nl = worldNode.getElementsByTagName("partition");
@@ -146,12 +145,12 @@ public class XmlWorldConfigInterpreter implements IXmlConfigInterpreter {
             Varz.set("partitionRadius", partitionRadius);
           } else if (partitionType.equalsIgnoreCase("distance")) {
             IParamParser pparser = new DistanceParser();
-            double partitionRadius = pparser.parse(radiusStr);
+            int partitionRadius = pparser.parse(radiusStr);
             partitions = roadmap.makePartitions(partitionRadius, 2, seedPriorityMode);
             Varz.set("partitionRadius", partitionRadius);
           } else if (partitionType.equalsIgnoreCase("time")) {
             IParamParser pparser = new TimeParser();
-            double partitionRadius = pparser.parse(radiusStr);
+            int partitionRadius = pparser.parse(radiusStr);
             partitions = roadmap.makePartitions(partitionRadius, 3, seedPriorityMode);
             Varz.set("partitionRadius", partitionRadius);
           } else {
@@ -221,7 +220,7 @@ public class XmlWorldConfigInterpreter implements IXmlConfigInterpreter {
           maxPart = Math.max(maxPart, partition.size());
           onePart += (partition.size() == 1 ? 1 : 0);
         }
-        System.out.println("Partition count:\n 1-segment= " + onePart + ", total= " + partitions.size() + "\n" + "Segments/partition:\n min= " + minPart + ", avg= " + Stat.round(roadmap.getNumberOfRoadSegments() / (double) partitions.size(), 1) + ", max= " + maxPart);
+        System.out.println("Partition count:\n 1-segment= " + onePart + ", total= " + partitions.size() + "\n" + "Segments/partition:\n min= " + minPart + ", avg= " + String.format("%.1f", roadmap.getRoadSegmentCount() / (double) partitions.size()) + ", max= " + maxPart);
 
         // output KML:
         if (doKMLmap) {

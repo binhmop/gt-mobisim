@@ -1,4 +1,4 @@
-// Copyright (c) 2009, Georgia Tech Research Corporation
+// Copyright (c) 2012, Georgia Tech Research Corporation
 // Authors:
 //   Peter Pesti (pesti@gatech.edu)
 //
@@ -14,13 +14,13 @@ public class RoadSegment {
   protected RoadJunction endJunction; // junction at the end of the segment
   protected boolean isDirected; // is the traffic directed on this segment?
   protected RoadSegmentGeometry geometry; // physical geometry of the segment
-  protected float speedLimit; // [m/s]
+  protected int speedLimit; // [mm/s]
 
-  protected float length = -1; // calculated & cached length [km]
+  protected int length = -1; // calculated & cached length [mm]
 
   protected Partition partition;
 
-  public RoadSegment(int id, RoadJunction startJunction, RoadJunction endJunction, boolean isDirected, CartesianVector[] points, float speedLimit) {
+  public RoadSegment(int id, RoadJunction startJunction, RoadJunction endJunction, boolean isDirected, CartesianVector[] points, int speedLimit) {
     this.id = id;
     this.startJunction = startJunction;
     this.endJunction = endJunction;
@@ -48,17 +48,18 @@ public class RoadSegment {
     return (i == 0) ? geometry.getFirstLocation() : geometry.getLastLocation();
   }
 
-  public CartesianVector getLocationAt(float progress) {
+  public CartesianVector getLocationAt(int progress) {
     return geometry.getLocationAt(progress);
   }
 
-  public CartesianVector getTangentAt(float progress) {
+  public CartesianVector getTangentAt(int progress) {
     return geometry.getTangentAt(progress);
   }
 
-  public float getLength() {
+  public int getLength() {
     if (length < 0) {
       length = geometry.getTotalLength();
+      assert (length % 2 == 0);
     }
     return length;
   }
@@ -98,7 +99,7 @@ public class RoadSegment {
   }
 
   public RoadnetVector getJunctionLocation(RoadJunction junction) {
-    return new RoadnetVector(this, (float) (getJunctionIndex(junction) == 0 ? 0 : getLength()));
+    return new RoadnetVector(this, getJunctionIndex(junction) == 0 ? 0 : getLength());
   }
 
   public boolean isBetween(RoadJunction j0, RoadJunction j1) {
@@ -121,7 +122,7 @@ public class RoadSegment {
     return partition;
   }
 
-  public float getSpeedLimit() {
+  public int getSpeedLimit() {
     return speedLimit;
   }
 
@@ -129,7 +130,8 @@ public class RoadSegment {
     return new RoadnetVector(this, geometry.getLocationProgress(v));
   }
 
+  @Override
   public String toString() {
-    return "(" + id + " " + (isDirected ? "D" : "U") + ")";
+    return String.format("(seg%d%s%s)", id, (isDirected ? "d" : "u"), (isLoop() ? "L" : ""));
   }
 }

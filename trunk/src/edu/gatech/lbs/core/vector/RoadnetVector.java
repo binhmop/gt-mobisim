@@ -1,4 +1,4 @@
-// Copyright (c) 2009, Georgia Tech Research Corporation
+// Copyright (c) 2012, Georgia Tech Research Corporation
 // Authors:
 //   Peter Pesti (pesti@gatech.edu)
 //
@@ -8,31 +8,30 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-import edu.gatech.lbs.core.logging.Stat;
 import edu.gatech.lbs.core.world.roadnet.RoadMap;
 import edu.gatech.lbs.core.world.roadnet.RoadSegment;
 
 public class RoadnetVector implements IVector {
   public static final byte typeCode = 'r';
 
-  private RoadSegment roadsegment;
-  private float progress; // [m], [m/s], [m/s^2] along the dimension defined by the road segment
+  protected RoadSegment roadsegment;
+  protected int progress; // [mm], [mm/s], [mm/s^2] along the dimension defined by the road segment
 
-  public RoadnetVector(RoadSegment roadsegment, float progress) {
+  public RoadnetVector(RoadSegment roadsegment, int progress) {
     this.roadsegment = roadsegment;
     this.progress = progress;
   }
 
   public RoadnetVector(DataInputStream in, RoadMap roadmap) throws IOException {
     roadsegment = roadmap.getRoadSegment(in.readInt());
-    progress = in.readFloat();
+    progress = in.readInt();
   }
 
-  public double getLength() {
+  public long getLength() {
     return progress;
   }
 
-  public float getProgress() {
+  public int getProgress() {
     return progress;
   }
 
@@ -40,7 +39,7 @@ public class RoadnetVector implements IVector {
     return roadsegment;
   }
 
-  public void add(float delta) {
+  public void add(int delta) {
     progress += delta;
   }
 
@@ -66,6 +65,7 @@ public class RoadnetVector implements IVector {
     return new RoadnetVector(roadsegment, vv.getProgress() - progress);
   }
 
+  @Override
   public IVector clone() {
     return new RoadnetVector(roadsegment, progress);
   }
@@ -85,11 +85,25 @@ public class RoadnetVector implements IVector {
   public void saveTo(DataOutputStream out) throws IOException {
     out.writeByte(typeCode);
     out.writeInt(roadsegment.getId());
-    out.writeFloat(progress);
+    out.writeInt(progress);
   }
 
+  @Override
   public String toString() {
-    return "(seg" + roadsegment.getId() + "@" + Stat.round(progress, 1) + "/" + Stat.round(roadsegment.getLength(), 1) + ")";
+    return String.format("(seg%d%s@%d/%d)", roadsegment.getId(), (roadsegment.isLoop() ? "L" : ""), progress, roadsegment.getLength());
+  }
+
+  /**
+   * Simple equality-check.
+   * Returns false for two locations that represent the same junction, if using different segments.
+   */
+  @Override
+  public boolean equals(Object o) {
+    if (o instanceof RoadnetVector) {
+      RoadnetVector v = (RoadnetVector) o;
+      return (v.getRoadSegment().getId() == getRoadSegment().getId() && v.getProgress() == getProgress());
+    }
+    return false;
   }
 
   public byte getTypeCode() {

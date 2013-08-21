@@ -1,4 +1,4 @@
-// Copyright (c) 2009, Georgia Tech Research Corporation
+// Copyright (c) 2012, Georgia Tech Research Corporation
 // Authors:
 //   Peter Pesti (pesti@gatech.edu)
 //
@@ -47,7 +47,7 @@ public class HierarchicGaussianLocationDistribution implements ILocationDistribu
     // uniform distribution on top level:
     if (level <= 0) {
       for (int d = 0; d < 2; d++) {
-        hier_center[0].setDimension(d, rnd.nextDouble() * worldBox.getDimension(d));
+        hier_center[0].setDimension(d, (long) (rnd.nextDouble() * worldBox.getDimension(d)));
       }
       level = 1;
     }

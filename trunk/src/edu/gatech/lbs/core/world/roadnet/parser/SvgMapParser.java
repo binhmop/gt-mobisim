@@ -1,4 +1,4 @@
-// Copyright (c) 2009, Georgia Tech Research Corporation
+// Copyright (c) 2012, Georgia Tech Research Corporation
 // Authors:
 //   Peter Pesti (pesti@gatech.edu)
 //
@@ -62,8 +62,8 @@ public class SvgMapParser extends MapParser {
               String value = st.nextToken();
               int idx = value.indexOf(',');
               // see: GlobalMapper8//Tools/Configuration/Projection: set UTM, NAD83, METERS
-              double x = Double.parseDouble(value.substring(0, idx)); // NOTE: this is in meters
-              double y = Double.parseDouble(value.substring(idx + 1)); // NOTE: this is in meters
+              long x = (long) (1000 * Double.parseDouble(value.substring(0, idx))); // parsed as [m]
+              long y = (long) (1000 * Double.parseDouble(value.substring(idx + 1))); // parsed as [m]
               points.add(new CartesianVector(x, y));
 
               bounds.includePoint(x, y);
@@ -75,7 +75,7 @@ public class SvgMapParser extends MapParser {
             // for undirected graphs, only one segment is created, which can be traversed back and forth
             CartesianVector[] pointArray = new CartesianVector[points.size()];
             points.toArray(pointArray);
-            RoadSegment seg = new ClassedRoadSegment(roadmap.getNextValidId(), junctions[0], junctions[1], false, pointArray, ((ClassedRoadMap) roadmap).getSpeedLimit(roadClassIndex), roadClassIndex);
+            RoadSegment seg = new ClassedRoadSegment(roadmap.getNextSegmentId(), junctions[0], junctions[1], false, pointArray, ((ClassedRoadMap) roadmap).getSpeedLimit(roadClassIndex), roadClassIndex);
             roadmap.addRoadSegment(seg);
           }
         }

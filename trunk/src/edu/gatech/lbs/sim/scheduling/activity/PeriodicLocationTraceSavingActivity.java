@@ -1,4 +1,4 @@
-// Copyright (c) 2009, Georgia Tech Research Corporation
+// Copyright (c) 2012, Georgia Tech Research Corporation
 // Authors:
 //   Peter Pesti (pesti@gatech.edu)
 //
@@ -15,9 +15,9 @@ import edu.gatech.lbs.sim.scheduling.event.PeriodicTraceSaveEvent;
 public class PeriodicLocationTraceSavingActivity implements ISimActivity {
   protected String traceFilename;
   protected DataOutputStream traceOutStream;
-  protected double period; // [sec]
+  protected int period; // [ms]
 
-  public PeriodicLocationTraceSavingActivity(String traceFilename, double period) {
+  public PeriodicLocationTraceSavingActivity(String traceFilename, int period) {
     this.traceFilename = traceFilename;
     this.period = period;
   }

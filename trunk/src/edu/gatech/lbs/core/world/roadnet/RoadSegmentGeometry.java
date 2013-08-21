@@ -1,4 +1,4 @@
-// Copyright (c) 2009, Georgia Tech Research Corporation
+// Copyright (c) 2012, Georgia Tech Research Corporation
 // Authors:
 //   Peter Pesti (pesti@gatech.edu)
 //
@@ -23,7 +23,13 @@ public class RoadSegmentGeometry {
     return points[points.length - 1];
   }
 
-  public float getTotalLength() {
+  /**
+   * Get total length of segment.
+   * All edges in the geometry are rounded with 2 mm precision, thus all junction-to-junction distances
+   * in the road network are even; and all closed loop routes have a halfway-point with a distance measured
+   * in whole millimeters.
+   */
+  public int getTotalLength() {
     return getDistanceBetweenPoints(0, points.length);
   }
 
@@ -31,33 +37,36 @@ public class RoadSegmentGeometry {
     return points;
   }
 
-  public float getDistanceBetweenPoints(int sindex, int eindex) {
-    float length = 0;
+  public int getDistanceBetweenPoints(int sindex, int eindex) {
+    int length = 0;
     for (int i = sindex; i < eindex - 1; i++) {
-      length += points[i].vectorTo(points[i + 1]).getLength();
+      length += points[i].vectorTo(points[i + 1]).getLength() & (~1);
     }
     return length;
   }
 
-  public CartesianVector getLocationAt(float progress) {
-    float length = 0;
+  public CartesianVector getLocationAt(int progress) {
+    int length = 0;
     int i;
     for (i = 0; length < progress; i++) {
-      length += points[i].vectorTo(points[i + 1]).getLength();
+      length += points[i].vectorTo(points[i + 1]).getLength() & (~1);
     }
 
     // v= last vector + (progress overshoot)*(vector from last point to one-before-last point)
     IVector v = points[i].clone();
     if (length > progress) {
       IVector tn = points[i].vectorTo(points[i - 1]);
-      tn.times((length - progress) / tn.getLength());
+      tn.times((length - progress) / (double) (tn.getLength() & (~1)));
       v.add(tn);
     }
     return (CartesianVector) v;
   }
 
-  public CartesianVector getTangentAt(float progress) {
-    float length = 0;
+  /**
+   * Get the tangent-vector at the given progress. The length of the vector is 1 km (1e6 mm).
+   */
+  public CartesianVector getTangentAt(int progress) {
+    int length = 0;
     int i;
     for (i = 0; length < progress; i++) {
       length += points[i].vectorTo(points[i + 1]).getLength();
@@ -69,15 +78,15 @@ public class RoadSegmentGeometry {
     } else {
       tn = points[i].vectorTo(points[i + 1]);
     }
-    tn.times(1.0 / tn.getLength());
+    tn.times(1e6 / tn.getLength());
     return (CartesianVector) tn;
   }
 
-  public float getLocationProgress(CartesianVector v) {
-    float minDist = -1;
+  public int getLocationProgress(CartesianVector v) {
+    long minDist = -1;
     int minPointIdx = -1;
     for (int i = 0; i < points.length; i++) {
-      float dist = (float) v.vectorTo(points[i]).getLength();
+      long dist = v.vectorTo(points[i]).getLength();
       if (minDist < 0 || dist < minDist) {
         minDist = dist;
         minPointIdx = i;

@@ -1,4 +1,4 @@
-// Copyright (c) 2009, Georgia Tech Research Corporation
+// Copyright (c) 2012, Georgia Tech Research Corporation
 // Authors:
 //   Peter Pesti (pesti@gatech.edu)
 //
@@ -7,6 +7,7 @@ package edu.gatech.lbs.sim.tracegenerator.mobilitytrace.individual;
 import java.util.List;
 
 import edu.gatech.lbs.core.vector.RoadnetVector;
+import edu.gatech.lbs.core.world.roadnet.RoadJunction;
 import edu.gatech.lbs.core.world.roadnet.RoadSegment;
 import edu.gatech.lbs.sim.Simulation;
 import edu.gatech.lbs.sim.agent.SimAgent;
@@ -20,7 +21,7 @@ public class RoadnetRandomWaypoint_IndividualMobilityModel extends IndividualMob
 
   protected RoadnetVector location;
   protected RoadnetVector destination; // next waypoint (junction)
-  protected RoadnetVector v; // [m/s]
+  protected RoadnetVector v; // [mm/s]
   protected SimAgent agent;
 
   protected ILocationDistribution locationDistribution;
@@ -42,7 +43,7 @@ public class RoadnetRandomWaypoint_IndividualMobilityModel extends IndividualMob
   }
 
   protected void startMovingOnNewSegment() {
-    v = new RoadnetVector(location.getRoadSegment(), (destination.getProgress() > location.getProgress() ? +1 : -1) * (float) Math.abs(speedDistribution.getNextValue(location)));
+    v = new RoadnetVector(location.getRoadSegment(), (destination.getProgress() > location.getProgress() ? +1 : -1) * (int) Math.abs(speedDistribution.getNextValue(location)));
   }
 
   public SimEvent getNextEvent() {
@@ -51,8 +52,8 @@ public class RoadnetRandomWaypoint_IndividualMobilityModel extends IndividualMob
       location = locationDistribution.getNextLocation().toRoadnetVector();
 
       RoadSegment segment = location.toRoadnetVector().getRoadSegment();
-      v = new RoadnetVector(segment, (float) speedDistribution.getNextValue(location));
-      destination = new RoadnetVector(segment, v.getLength() > 0 ? segment.getLength() : 0);
+      v = new RoadnetVector(segment, speedDistribution.getNextValue(location));
+      destination = new RoadnetVector(segment, v.getProgress() > 0 ? segment.getLength() : 0);
 
       return new VelocityChangeEvent(sim, timestamp, agent, location, v);
     }
@@ -66,7 +67,7 @@ public class RoadnetRandomWaypoint_IndividualMobilityModel extends IndividualMob
     if (v.getLength() == 0) {
       // stop at intersection before starting to move:
       if (stoppingTimeDistribution != null) {
-        timestamp += (long) (1000 * stoppingTimeDistribution.getNextValue(location));
+        timestamp += stoppingTimeDistribution.getNextValue(location);
       }
       startMovingOnNewSegment();
 
@@ -74,45 +75,39 @@ public class RoadnetRandomWaypoint_IndividualMobilityModel extends IndividualMob
     }
 
     // if we are moving, we travel to our destination:
-    timestamp += (long) (1000 * location.vectorTo(destination).getLength() / v.getLength());
+    timestamp += (long) (1000 * (double) location.vectorTo(destination).getLength() / v.getLength());
     location = destination;
 
     RoadSegment roadsegment = location.getRoadSegment();
-    double progress = location.getProgress();
-    List<RoadSegment> originatingRoads = null;
-    List<RoadSegment> terminatingRoads = null;
+    int progress = location.getProgress();
 
+    RoadJunction jun = null;
     // if at the origin of current segment:
     if (progress == 0 && !roadsegment.isDirected()) {
-      originatingRoads = roadsegment.getSourceJunction().getOriginatingRoads();
-      terminatingRoads = roadsegment.getSourceJunction().getTerminatingUndirectedRoads();
+      jun = roadsegment.getSourceJunction();
     }
     // if at termination of current segment:
     else if (progress == roadsegment.getLength()) {
-      originatingRoads = roadsegment.getTargetJunction().getOriginatingRoads();
-      terminatingRoads = roadsegment.getTargetJunction().getTerminatingUndirectedRoads();
+      jun = roadsegment.getTargetJunction();
     }
 
-    int originatingRoadsCount = originatingRoads == null ? 0 : originatingRoads.size();
-    int terminatingRoadsCount = terminatingRoads == null ? 0 : terminatingRoads.size();
     // if there are outgoing roads, choose one at random:
-    if (originatingRoadsCount + terminatingRoadsCount > 0) {
-      boolean isSingleExitJunction = (originatingRoadsCount + terminatingRoadsCount == 1);
-      int chosenRoadNum;
-      // don't choose the entry road, if there are other choices:
+    List<RoadSegment> segments = (jun == null ? null : jun.getReachableRoads());
+    if (jun != null && !segments.isEmpty()) {
+      // Don't choose the entry road, if there are other choices.
+      RoadSegment seg2;
       do {
-        chosenRoadNum = (int) ((originatingRoadsCount + terminatingRoadsCount) * Math.random());
-      } while (!isSingleExitJunction && ((chosenRoadNum < originatingRoadsCount && roadsegment == originatingRoads.get(chosenRoadNum)) || (chosenRoadNum >= originatingRoadsCount && roadsegment == terminatingRoads.get(chosenRoadNum - originatingRoadsCount))));
+        seg2 = segments.get((int) (segments.size() * Math.random()));
+      } while (segments.size() > 1 && roadsegment == seg2);
+      roadsegment = seg2;
 
       // if chosen edge originates at current junction:
-      if (chosenRoadNum < originatingRoadsCount) {
-        roadsegment = originatingRoads.get(chosenRoadNum);
+      if (jun == roadsegment.getSourceJunction()) {
         location = new RoadnetVector(roadsegment, 0);
         destination = new RoadnetVector(roadsegment, roadsegment.getLength());
       }
       // if chosen edge terminates at current junction:
       else {
-        roadsegment = terminatingRoads.get(chosenRoadNum - originatingRoadsCount);
         location = new RoadnetVector(roadsegment, roadsegment.getLength());
         destination = new RoadnetVector(roadsegment, 0);
       }
