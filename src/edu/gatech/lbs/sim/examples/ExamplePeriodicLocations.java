@@ -11,15 +11,13 @@ import edu.gatech.lbs.sim.config.paramparser.TimeParser;
 /**
  * An example program to demonstrate how to get the location & velocity of an agent
  * at periodic time intervals.
- *
  */
 public class ExamplePeriodicLocations {
 
   public static void main(String[] args) {
     if (args.length != 3) {
       System.out.println("Usage example:");
-      System.out
-          .println("  java " + ExamplePeriodicLocations.class.getName() + " jnlp-demo.xml \"30 sec\" 0");
+      System.out.println("  java " + ExamplePeriodicLocations.class.getName() + " web-demo.xml \"30 sec\" 0");
       return;
     }
 

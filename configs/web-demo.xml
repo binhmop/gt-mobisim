@@ -1,6 +1,6 @@
 <simulation starttime="0 min" endtime="10 min" warmup="90 sec">
   <world type="roadnet">
-  <file name="http://gt-mobisim.googlecode.com/svn/trunk/configs/maps/Northwest_Atlanta_GA_24k.svg">
+  <file name="maps/Northwest_Atlanta_GA_24k.svg">
     <class name="CLASS_1" v_max="70 mph"/>
     <class name="CLASS_2" v_max="55 mph"/>
     <class name="CLASS_3" v_max="30 mph"/>
@@ -9,10 +9,10 @@
   </world>
 
   <agents count="1000">
-    <mobilitymodel type="RandomTripRoadnet" filename="http://gt-mobisim.googlecode.com/svn/trunk/configs/traces/jnlp-demo.m.trace">
-      <parking type="gaussian" mean="30 sec" stdev="5 sec"/>
+    <mobilitymodel type="RandomTripRoadnet" filename="traces/web-demo.m.trace">
+      <parking type="gaussian" mean="10 sec" stdev="5 sec"/>
 			
-      <locationdistribution type="hotspotroadnet" count="2" coeff="0.5" seed="0"/>
+      <locationdistribution type="hotspotroadnet" count="5" coeff="0.9" seed="0"/>
 			
       <speeddistribution type="roadnet">
         <class type="gaussian" mean="70 mph" stdev="14 mph"/>
@@ -22,7 +22,7 @@
       </speeddistribution>
     </mobilitymodel>
 
-    <querymodel type="fixednumber_range" count="100" filename="http://gt-mobisim.googlecode.com/svn/trunk/configs/traces/jnlp-demo.q.trace">
+    <querymodel type="fixednumber_range" count="100" filename="traces/web-demo.q.trace">
       <locationdistribution type="uniformroadnet"/>
       <radius type="gaussian" mean="2 mi" stdev="0.4 mi" />
       <lifetime type="gaussian" mean="4 min" stdev="0.8 min" />

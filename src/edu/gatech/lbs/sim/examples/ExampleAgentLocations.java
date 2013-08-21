@@ -13,14 +13,13 @@ import edu.gatech.lbs.sim.config.paramparser.TimeParser;
 
 /**
  * An example program to demonstrate how to get the locations of agents at a given time.
- *
  */
 public class ExampleAgentLocations {
 
   public static void main(String[] args) {
     if (args.length != 2) {
       System.out.println("Usage example:");
-      System.out.println("  java " + ExampleAgentLocations.class.getName() + " jnlp-demo.xml \"2.5 min\"");
+      System.out.println("  java " + ExampleAgentLocations.class.getName() + " web-demo.xml \"2.5 min\"");
       return;
     }
 
