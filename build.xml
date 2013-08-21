@@ -24,7 +24,7 @@
 		
 		<zip destfile="${filename}"
 			basedir="."
-	    	includes="src/**, thirdparty/**, configs/*, configs/maps/*, configs/traces/jnlp*, .settings/*, *.*"
+	    	includes="src/**, thirdparty/**, configs/*, configs/maps/*, configs/traces/web*, .settings/*, *.*"
 	    	excludes="**/*.class, **/*.zip, **/*.partition, **/*.kml"
 			update="no"
 	    />
