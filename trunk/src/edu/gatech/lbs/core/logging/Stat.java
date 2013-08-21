@@ -1,4 +1,4 @@
-// Copyright (c) 2009, Georgia Tech Research Corporation
+// Copyright (c) 2012, Georgia Tech Research Corporation
 // Authors:
 //   Peter Pesti (pesti@gatech.edu)
 //
@@ -75,10 +75,5 @@ public class Stat {
     }
 
     return count;
-  }
-
-  public static double round(double v, int fractions) {
-    double tens = Math.pow(10, fractions);
-    return Math.round(v * tens) / tens;
   }
 }
