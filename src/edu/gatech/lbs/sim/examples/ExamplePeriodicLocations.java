@@ -18,7 +18,8 @@ public class ExamplePeriodicLocations {
   public static void main(String[] args) {
     if (args.length != 3) {
       System.out.println("Usage example:");
-      System.out.println("  java " + ExamplePeriodicLocations.class + " jnlp-demo.xml \"30 sec\" 0");
+      System.out
+          .println("  java " + ExamplePeriodicLocations.class.getName() + " jnlp-demo.xml \"30 sec\" 0");
       return;
     }
 
@@ -36,7 +37,9 @@ public class ExamplePeriodicLocations {
 
       System.out.println("Agent #" + agent.getSimAgentId() + " at t= " + t + " ms:");
       System.out.println("  location vector: " + agent.getLocation().toCartesianVector());
-      System.out.println("  velocity vector: " + agent.getLocation().toRoadnetVector().toTangentVector().times(1e-6 * agent.getVelocity().getLength()).toCartesianVector());
+      System.out.println("  velocity vector: "
+          + agent.getLocation().toRoadnetVector().toTangentVector()
+              .times(1e-6 * agent.getVelocity().getLength()).toCartesianVector());
 
     }
 

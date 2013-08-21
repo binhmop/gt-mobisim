@@ -22,7 +22,8 @@ public class ExampleAgentsOnSegment {
   public static void main(String[] args) {
     if (args.length != 3) {
       System.out.println("Usage example:");
-      System.out.println("  java " + ExampleAgentsOnSegment.class + " jnlp-demo.xml \"150 sec\" 4618");
+      System.out.println("  java " + ExampleAgentsOnSegment.class.getName()
+          + " jnlp-demo.xml \"150 sec\" 4618");
       return;
     }
 
@@ -40,7 +41,8 @@ public class ExampleAgentsOnSegment {
     if (agents != null) {
       for (SimAgent agent : agents) {
         RoadnetVector l = agent.getLocation().toRoadnetVector();
-        System.out.println("Agent #" + agent.getSimAgentId() + " on segment " + l.getRoadSegment().getId() + " at progress= " + String.format("%.2f m", l.getProgress() / 1000.0));
+        System.out.println("Agent #" + agent.getSimAgentId() + " on segment " + l.getRoadSegment().getId()
+            + " at progress= " + String.format("%.2f m", l.getProgress() / 1000.0));
       }
     }
 
