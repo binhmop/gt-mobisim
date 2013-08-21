@@ -20,7 +20,7 @@ public class ExampleAgentLocations {
   public static void main(String[] args) {
     if (args.length != 2) {
       System.out.println("Usage example:");
-      System.out.println("  java " + ExampleAgentLocations.class + " jnlp-demo.xml \"2.5 min\"");
+      System.out.println("  java " + ExampleAgentLocations.class.getName() + " jnlp-demo.xml \"2.5 min\"");
       return;
     }
 
@@ -39,7 +39,8 @@ public class ExampleAgentLocations {
 
       System.out.println("Agent #" + agent.getSimAgentId() + ":");
       System.out.println("  X= " + vec1.getX() + " m, Y= " + vec1.getY() + " m");
-      System.out.println("  segment #" + vec2.getRoadSegment().getId() + ", progress= " + String.format("%.2f m", vec2.getProgress() / 1000.0));
+      System.out.println("  segment #" + vec2.getRoadSegment().getId() + ", progress= "
+          + String.format("%.2f m", vec2.getProgress() / 1000.0));
     }
 
     sim.endSimulation();
