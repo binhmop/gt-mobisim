@@ -3,7 +3,7 @@
 <project name="gt-mobisim" default="package-jar" basedir=".">
 
 	<target name="build">
-		<javac srcdir="./src" destdir="./bin">
+		<javac includeantruntime="false" srcdir="./src" destdir="./bin">
 			<include name="**/*.java"/>
 		</javac>
 	</target>
