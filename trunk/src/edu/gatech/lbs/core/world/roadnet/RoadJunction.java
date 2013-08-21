@@ -1,4 +1,4 @@
-// Copyright (c) 2009, Georgia Tech Research Corporation
+// Copyright (c) 2012, Georgia Tech Research Corporation
 // Authors:
 //   Peter Pesti (pesti@gatech.edu)
 //
@@ -16,10 +16,17 @@ public class RoadJunction {
   protected List<RoadSegment> outRoads; // outgoing (originating) roads
   protected List<RoadSegment> inRoads; // incoming (terminating) roads
 
+  // Secondary list of segments reachable from this junction, in clockwise order.
+  // Undirected loops are listed twice.
+  protected List<RoadSegment> reachableSegmentsClockwise;
+  protected List<Double> segmentThetas;
+
   public RoadJunction(int id) {
     this.id = id;
     outRoads = new ArrayList<RoadSegment>(1);
     inRoads = new ArrayList<RoadSegment>(1);
+    reachableSegmentsClockwise = new LinkedList<RoadSegment>();
+    segmentThetas = new LinkedList<Double>();
   }
 
   public int getId() {
@@ -40,15 +47,56 @@ public class RoadJunction {
 
   public void addOriginatingRoad(RoadSegment roadsegment) {
     outRoads.add(roadsegment);
+    addReachableSegment(roadsegment, 0);
   }
 
   public void addTerminatingRoad(RoadSegment roadsegment) {
     inRoads.add(roadsegment);
+    if (!roadsegment.isDirected()) {
+      addReachableSegment(roadsegment, 1);
+    }
+  }
+
+  /**
+   * Get the theta angle of the segment's tangent vector (pointing away from the junction) at this junction.
+   */
+  protected double getSegmentTheta(RoadSegment seg, int endIdx) {
+    CartesianVector tangentOut = (endIdx == 0 ? seg.getTangentAt(0) : seg.getTangentAt(seg.getLength()).times(-1).toCartesianVector());
+    return tangentOut.getThetaRadians();
+  }
+
+  protected int getSegmentClockwiseIndex(double theta) {
+    int idx = 0;
+    for (Double theta2 : segmentThetas) {
+      if (theta2 <= theta) {
+        return idx;
+      }
+      idx++;
+    }
+    return idx;
+  }
+
+  protected void addReachableSegment(RoadSegment seg, int endIdx) {
+    double theta = getSegmentTheta(seg, endIdx);
+    int idx = getSegmentClockwiseIndex(theta);
+    reachableSegmentsClockwise.add(idx, seg);
+    segmentThetas.add(idx, theta);
   }
 
   public void removeRoad(RoadSegment roadsegment) {
+    int endIdx = 0;
     if (!inRoads.remove(roadsegment)) {
-      outRoads.remove(roadsegment);
+      if (!outRoads.remove(roadsegment)) {
+        return;
+      }
+      endIdx = 1;
+    }
+
+    double theta = getSegmentTheta(roadsegment, endIdx);
+    int idx = getSegmentClockwiseIndex(theta);
+    if (idx < reachableSegmentsClockwise.size()) {
+      reachableSegmentsClockwise.remove(idx);
+      segmentThetas.remove(idx);
     }
   }
 
@@ -58,6 +106,14 @@ public class RoadJunction {
 
   public List<RoadSegment> getTerminatingRoads() {
     return inRoads;
+  }
+
+  /**
+   * Get all segments that could be entered on by traffic, starting from this junction.
+   * Segments are in clockwise order. Undirected loops are listed twice.
+   */
+  public List<RoadSegment> getReachableRoads() {
+    return reachableSegmentsClockwise;
   }
 
   public List<RoadSegment> getAllRoads(boolean isRepeatingLoops) {
@@ -95,33 +151,7 @@ public class RoadJunction {
   }
 
   /**
-   * Get the roads whose vertex-direction terminates at this junction, but whose traffic-direction
-   * allows traffic to enter the segment from this junction.
-   * 
-   */
-  public List<RoadSegment> getTerminatingUndirectedRoads() {
-    List<RoadSegment> undirectedInRoads = new ArrayList<RoadSegment>();
-    for (RoadSegment segment : inRoads) {
-      if (!segment.isDirected()) {
-        undirectedInRoads.add(segment);
-      }
-    }
-    return undirectedInRoads;
-  }
-
-  /**
-   * Get all roads that could be entered on by traffic, starting from this junction.
-   * 
-   */
-  public List<RoadSegment> getReachableRoads() {
-    List<RoadSegment> roads = getTerminatingUndirectedRoads();
-    roads.addAll(outRoads);
-    return roads;
-  }
-
-  /**
    * Get the location of junction in (x,y) coordinates.
-   * 
    */
   public CartesianVector getCartesianLocation() {
     if (inRoads.isEmpty() && outRoads.isEmpty()) {
@@ -147,5 +177,15 @@ public class RoadJunction {
       return new RoadnetVector(seg, seg.getLength());
 
     }
+  }
+
+  @Override
+  public String toString() {
+    StringBuilder str = new StringBuilder();
+    str.append("jun" + id + "\n");
+    for (RoadSegment seg : getReachableRoads()) {
+      str.append(" " + seg + "\n");
+    }
+    return str.toString();
   }
 }
