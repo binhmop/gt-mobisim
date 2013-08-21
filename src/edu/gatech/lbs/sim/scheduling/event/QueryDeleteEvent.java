@@ -1,4 +1,4 @@
-// Copyright (c) 2009, Georgia Tech Research Corporation
+// Copyright (c) 2012, Georgia Tech Research Corporation
 // Authors:
 //   Peter Pesti (pesti@gatech.edu)
 //
@@ -38,6 +38,10 @@ public class QueryDeleteEvent extends SimEvent {
 
   public void execute() {
     sim.simulateRemoveQuery(simKey);
+  }
+
+  public int getSimAgentId() {
+    return simKey.uid;
   }
 
   public byte getTypeCode() {
