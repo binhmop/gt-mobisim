@@ -15,7 +15,6 @@ import edu.gatech.lbs.sim.config.paramparser.TimeParser;
 
 /**
  * An example program to demonstrate how to get the list of agents on a segment at a given time.
- *
  */
 public class ExampleAgentsOnSegment {
 
@@ -23,7 +22,7 @@ public class ExampleAgentsOnSegment {
     if (args.length != 3) {
       System.out.println("Usage example:");
       System.out.println("  java " + ExampleAgentsOnSegment.class.getName()
-          + " jnlp-demo.xml \"150 sec\" 4618");
+          + " web-demo.xml \"150 sec\" 4618");
       return;
     }
 
