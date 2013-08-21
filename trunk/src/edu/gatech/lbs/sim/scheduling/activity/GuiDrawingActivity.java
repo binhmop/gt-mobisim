@@ -1,4 +1,4 @@
-// Copyright (c) 2009, Georgia Tech Research Corporation
+// Copyright (c) 2012, Georgia Tech Research Corporation
 // Authors:
 //   Peter Pesti (pesti@gatech.edu)
 //
@@ -12,6 +12,7 @@ import edu.gatech.lbs.sim.gui.SimPanel;
 import edu.gatech.lbs.sim.gui.drawer.AgentsDrawer;
 import edu.gatech.lbs.sim.gui.drawer.IDrawer;
 import edu.gatech.lbs.sim.gui.drawer.RoadMapDrawer;
+import edu.gatech.lbs.sim.gui.drawer.RodDrawer;
 import edu.gatech.lbs.sim.gui.drawer.TimeDrawer;
 import edu.gatech.lbs.sim.scheduling.event.DrawGUIEvent;
 
@@ -27,6 +28,7 @@ public class GuiDrawingActivity implements ISimActivity {
     drawers.add(new RoadMapDrawer(sim, panel));
     drawers.add(new AgentsDrawer(sim, panel));
     drawers.add(new TimeDrawer(sim));
+    drawers.add(new RodDrawer(panel));
     return drawers;
   }
 
