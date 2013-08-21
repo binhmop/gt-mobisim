@@ -1,4 +1,4 @@
-// Copyright (c) 2009, Georgia Tech Research Corporation
+// Copyright (c) 2012, Georgia Tech Research Corporation
 // Authors:
 //   Peter Pesti (pesti@gatech.edu)
 //
@@ -10,9 +10,9 @@ import java.util.Collection;
 public class ClassedRoadMap extends RoadMap {
 
   protected String[] roadClassNames = null; // name of each road class
-  protected float[] speedLimits; // speed limit for each road class [m/s]
+  protected int[] speedLimits; // speed limit for each road class [mm/s]
 
-  public ClassedRoadMap(String[] roadClassNames, float[] speedLimits) {
+  public ClassedRoadMap(String[] roadClassNames, int[] speedLimits) {
     super(false);
 
     this.roadClassNames = roadClassNames;
@@ -39,7 +39,7 @@ public class ClassedRoadMap extends RoadMap {
     return roadClassNames[index];
   }
 
-  public float getSpeedLimit(int index) {
+  public int getSpeedLimit(int index) {
     return speedLimits[index];
   }
 

@@ -1,22 +1,21 @@
-// Copyright (c) 2009, Georgia Tech Research Corporation
+// Copyright (c) 2012, Georgia Tech Research Corporation
 // Authors:
 //   Peter Pesti (pesti@gatech.edu)
 //
 package edu.gatech.lbs.core.world;
 
-import edu.gatech.lbs.core.logging.Stat;
 import edu.gatech.lbs.core.vector.CartesianVector;
 
 public class BoundingBox {
-  private double x0; // west->east
-  private double y0; // south->north
-  private double width = -1;
-  private double height = -1;
+  private long x0; // west->east
+  private long y0; // south->north
+  private long width = -1;
+  private long height = -1;
 
   public BoundingBox() {
   }
 
-  public BoundingBox(double x0, double y0, double width, double height) {
+  public BoundingBox(long x0, long y0, long width, long height) {
     this.x0 = x0;
     this.y0 = y0;
     this.width = width;
@@ -24,27 +23,27 @@ public class BoundingBox {
 
   }
 
-  public double getWestBoundary() {
+  public long getWestBoundary() {
     return x0;
   }
 
-  public double getEastBoundary() {
+  public long getEastBoundary() {
     return x0 + width;
   }
 
-  public double getSouthBoundary() {
+  public long getSouthBoundary() {
     return y0;
   }
 
-  public double getNorthBoundary() {
+  public long getNorthBoundary() {
     return y0 + height;
   }
 
-  public double getDimension(int d) {
+  public long getDimension(int d) {
     return d == 0 ? width : height;
   }
 
-  public void includePoint(double x, double y) {
+  public void includePoint(long x, long y) {
     if (width < 0 && height < 0) {
       x0 = x;
       y0 = y;
@@ -58,23 +57,23 @@ public class BoundingBox {
     }
   }
 
-  public double getX0() {
+  public long getX0() {
     return x0;
   }
 
-  public double getY0() {
+  public long getY0() {
     return y0;
   }
 
-  public double getWidth() {
+  public long getWidth() {
     return width;
   }
 
-  public double getHeight() {
+  public long getHeight() {
     return height;
   }
 
-  public double getArea() {
+  public long getArea() {
     return width * height;
   }
 
@@ -87,7 +86,7 @@ public class BoundingBox {
   }
 
   public String toString() {
-    return "x0= " + Stat.round(x0, 1) + ", y0= " + Stat.round(y0, 1) + ", width= " + Stat.round(width, 1) + " m, height = " + Stat.round(height, 1) + " m";
+    return String.format("x0= %.2f km, ", x0 / 1e6) + String.format("y0= %.2f km, ", y0 / 1e6) + String.format("width= %.2f km, ", width / 1e6) + String.format("height= %.2f km", height / 1e6);
   }
 
 }

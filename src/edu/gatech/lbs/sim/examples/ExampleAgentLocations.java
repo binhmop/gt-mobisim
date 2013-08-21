@@ -1,4 +1,4 @@
-// Copyright (c) 2009, Georgia Tech Research Corporation
+// Copyright (c) 2012, Georgia Tech Research Corporation
 // Authors:
 //   Peter Pesti (pesti@gatech.edu)
 //
@@ -25,7 +25,7 @@ public class ExampleAgentLocations {
     }
 
     String configFilename = args[0];
-    long t = (long) (new TimeParser().parse(args[1]) * 1000); // [ms]
+    long t = new TimeParser().parse(args[1]); // [ms]
 
     Simulation sim = new Simulation();
     sim.loadConfiguration(configFilename);
@@ -39,7 +39,7 @@ public class ExampleAgentLocations {
 
       System.out.println("Agent #" + agent.getSimAgentId() + ":");
       System.out.println("  X= " + vec1.getX() + " m, Y= " + vec1.getY() + " m");
-      System.out.println("  segment #" + vec2.getRoadSegment().getId() + ", progress= " + vec2.getProgress() + " m");
+      System.out.println("  segment #" + vec2.getRoadSegment().getId() + ", progress= " + String.format("%.2f m", vec2.getProgress() / 1000.0));
     }
 
     sim.endSimulation();

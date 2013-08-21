@@ -1,4 +1,4 @@
-// Copyright (c) 2009, Georgia Tech Research Corporation
+// Copyright (c) 2012, Georgia Tech Research Corporation
 // Authors:
 //   Peter Pesti (pesti@gatech.edu)
 //
@@ -27,7 +27,7 @@ public class ExampleAgentsOnSegment {
     }
 
     String configFilename = args[0];
-    long t = (long) (new TimeParser().parse(args[1]) * 1000); // [ms]
+    long t = new TimeParser().parse(args[1]); // [ms]
     int segmentId = Integer.parseInt(args[2]);
 
     Simulation sim = new Simulation();
@@ -40,7 +40,7 @@ public class ExampleAgentsOnSegment {
     if (agents != null) {
       for (SimAgent agent : agents) {
         RoadnetVector l = agent.getLocation().toRoadnetVector();
-        System.out.println("Agent #" + agent.getSimAgentId() + " on segment " + l.getRoadSegment().getId() + " at progress= " + l.getProgress());
+        System.out.println("Agent #" + agent.getSimAgentId() + " on segment " + l.getRoadSegment().getId() + " at progress= " + String.format("%.2f m", l.getProgress() / 1000.0));
       }
     }
 

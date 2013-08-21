@@ -1,4 +1,4 @@
-// Copyright (c) 2009, Georgia Tech Research Corporation
+// Copyright (c) 2012, Georgia Tech Research Corporation
 // Authors:
 //   Peter Pesti (pesti@gatech.edu)
 //
@@ -13,9 +13,9 @@ import edu.gatech.lbs.sim.agent.SimAgent;
 
 public class PeriodicTraceSaveEvent extends SimEvent {
   protected DataOutputStream out;
-  protected double period; // [sec]
+  protected int period; // [ms]
 
-  public PeriodicTraceSaveEvent(Simulation sim, long timestamp, double period, DataOutputStream out) {
+  public PeriodicTraceSaveEvent(Simulation sim, long timestamp, int period, DataOutputStream out) {
     super(sim, timestamp);
     this.out = out;
     this.period = period;
@@ -40,7 +40,7 @@ public class PeriodicTraceSaveEvent extends SimEvent {
       }
 
       // schedule next snapshot:
-      sim.addEvent(new PeriodicTraceSaveEvent(sim, timestamp + (long) (1000 * period), period, out));
+      sim.addEvent(new PeriodicTraceSaveEvent(sim, timestamp + period, period, out));
     } catch (IOException e) {
       System.out.println("Unable to write trace file.");
       System.exit(-1);

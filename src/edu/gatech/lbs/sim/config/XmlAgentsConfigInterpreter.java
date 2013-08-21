@@ -1,4 +1,4 @@
-// Copyright (c) 2009, Georgia Tech Research Corporation
+// Copyright (c) 2012, Georgia Tech Research Corporation
 // Authors:
 //   Peter Pesti (pesti@gatech.edu)
 //
@@ -52,7 +52,7 @@ public class XmlAgentsConfigInterpreter implements IXmlConfigInterpreter {
       if (periodicTraceNode != null) {
         String snapshotTraceFilename = periodicTraceNode.getAttribute("filename");
         IParamParser pparser2 = new TimeParser();
-        double period = pparser2.parse(periodicTraceNode.getAttribute("period"));
+        int period = pparser2.parse(periodicTraceNode.getAttribute("period"));
         sim.addActivity(new PeriodicLocationTraceSavingActivity(snapshotTraceFilename, period));
       }
     }

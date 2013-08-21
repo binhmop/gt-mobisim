@@ -1,4 +1,4 @@
-// Copyright (c) 2009, Georgia Tech Research Corporation
+// Copyright (c) 2012, Georgia Tech Research Corporation
 // Authors:
 //   Peter Pesti (pesti@gatech.edu)
 //
@@ -30,7 +30,7 @@ public class Partition {
   protected List<RoadJunction> junctions;
   protected HashMap<Integer, Integer> junctionMap; // junctionID --> junction-in-partition-ID mapping
   protected boolean[] isBorderPoint; // border-points
-  protected float[][] d; // node-to-node distance table
+  protected int[][] d; // node-to-node distance table
   protected List<Integer>[][] minPath; // node-to-node shortest paths
   protected List<Boolean>[][] direction; // node-to-node shortest paths' directionality
 
@@ -61,12 +61,12 @@ public class Partition {
     }
 
     int n = junctions.size();
-    d = new float[n][n];
+    d = new int[n][n];
     minPath = new ArrayList[n][n];
     direction = new ArrayList[n][n];
     for (int i = 0; i < d.length; i++) {
       for (int j = 0; j < d.length; j++) {
-        d[i][j] = in.readFloat();
+        d[i][j] = in.readInt();
         assert (d[i][j] >= 0);
 
         int pathLength = in.readInt();
@@ -96,7 +96,7 @@ public class Partition {
     }
     for (int i = 0; i < d.length; i++) {
       for (int j = 0; j < d.length; j++) {
-        out.writeFloat(d[i][j]);
+        out.writeInt(d[i][j]);
 
         out.writeInt(minPath[i][j].size());
         for (int k = 0; k < minPath[i][j].size(); k++) {
@@ -144,13 +144,13 @@ public class Partition {
     // precompute node-to-node distances:
     // initialize distances for Floyd-Warshall:
     int n = junctions.size();
-    d = new float[n][n];
+    d = new int[n][n];
     minPath = new ArrayList[n][n];
     direction = new ArrayList[n][n];
     // set 0-length path for self-access:
     for (int i = 0; i < junctions.size(); i++) {
       for (int j = 0; j < junctions.size(); j++) {
-        d[i][j] = Float.MAX_VALUE;
+        d[i][j] = Integer.MAX_VALUE;
         minPath[i][j] = new ArrayList<Integer>();
         direction[i][j] = new ArrayList<Boolean>();
       }
@@ -234,7 +234,7 @@ public class Partition {
       return route;
     }
 
-    double minDist = Double.MAX_VALUE;
+    int minDist = Integer.MAX_VALUE;
     int nodeIdx0_best = -1;
     int nodeIdx1_best = -1;
     int j0_best = -1;
@@ -243,16 +243,16 @@ public class Partition {
     for (int j0 = 0; j0 == 0 || (j0 == 1 && !seg0.isDirected()); j0++) {
       int nodeIdx0 = junctionMap.get(seg0.getEndJunction(j0).getId());
       // distance from source to first node on route:
-      double dist0 = (j0 == 0 ? loc0.getProgress() : seg0.getLength() - loc0.getProgress());
+      int dist0 = (j0 == 0 ? loc0.getProgress() : seg0.getLength() - loc0.getProgress());
 
       // examine routes going forward & backward to target:
       for (int j1 = 0; j1 == 0 || (j1 == 1 && !seg1.isDirected()); j1++) {
         int nodeIdx1 = junctionMap.get(seg1.getEndJunction(j1).getId());
         // distance from target to last node on route:
-        double dist1 = (j1 == 0 ? loc1.getProgress() : seg1.getLength() - loc1.getProgress());
+        int dist1 = (j1 == 0 ? loc1.getProgress() : seg1.getLength() - loc1.getProgress());
 
         // total distance is node-to-node distance + fractions on the source & target segments:
-        double newMinDist = d[nodeIdx0][nodeIdx1] + dist0 + dist1;
+        int newMinDist = d[nodeIdx0][nodeIdx1] + dist0 + dist1;
         if (newMinDist < minDist) {
           minDist = newMinDist;
           nodeIdx0_best = nodeIdx0;
@@ -293,5 +293,20 @@ public class Partition {
     }
 
     return minRoute;
+  }
+
+  public int getJunctionDistance(RoadJunction jun0, RoadJunction jun1) {
+    int junId0 = junctionMap.get(jun0.getId());
+    int junId1 = junctionMap.get(jun1.getId());
+    return d[junId0][junId1];
+  }
+
+  public int getMaxJunctionDistance(RoadJunction jun0) {
+    int junId = junctionMap.get(jun0.getId());
+    int maxDist = 0;
+    for (int i = 0; i < d.length; ++i) {
+      maxDist = Math.max(maxDist, d[junId][i]);
+    }
+    return maxDist;
   }
 }

@@ -1,4 +1,4 @@
-// Copyright (c) 2009, Georgia Tech Research Corporation
+// Copyright (c) 2012, Georgia Tech Research Corporation
 // Authors:
 //   Peter Pesti (pesti@gatech.edu)
 //
@@ -11,22 +11,22 @@ import edu.gatech.lbs.core.vector.IVector;
 public class UniformParamDistribution implements IParamDistribution {
   public static final String xmlName = "uniform";
 
-  private double min; // [m] or [m/s] or [s]
-  private double max; // [m] or [m/s] or [s]
+  private int min; // [nm] or [nm/s] or [ns]
+  private int max; // [nm] or [mn/s] or [ns]
 
   private Random rnd;
 
-  public UniformParamDistribution(double min, double max) {
+  public UniformParamDistribution(int min, int max) {
     this.min = min;
     this.max = max;
 
     rnd = new Random();
   }
 
-  public double getNextValue(IVector location) {
-    double speed;
+  public int getNextValue(IVector location) {
+    int speed;
     do {
-      speed = min + rnd.nextDouble() * (max - min);
+      speed = (int) (min + rnd.nextDouble() * (max - min));
     } while (speed <= 0);
     return speed;
   }

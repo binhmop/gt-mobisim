@@ -1,4 +1,4 @@
-// Copyright (c) 2009, Georgia Tech Research Corporation
+// Copyright (c) 2012, Georgia Tech Research Corporation
 // Authors:
 //   Peter Pesti (pesti@gatech.edu)
 //
@@ -24,7 +24,7 @@ public class HotspotRoadnetLocationDistribution implements ILocationDistribution
 
   public HotspotRoadnetLocationDistribution(RoadMap roadmap, int hotspotCount, double coeff, long seed) {
     Collection<RoadSegment> segments0 = roadmap.getRoadSegments();
-    segments = new RoadSegment[roadmap.getNumberOfRoadSegments()];
+    segments = new RoadSegment[roadmap.getRoadSegmentCount()];
     int r = 0;
     for (RoadSegment roadSegment : segments0) {
       segments[r] = roadSegment;
@@ -46,11 +46,11 @@ public class HotspotRoadnetLocationDistribution implements ILocationDistribution
       // calculate hotspottyness of all segments:
       HashMap<Integer, RoadJunctionDistance> junctionDist = new HashMap<Integer, RoadJunctionDistance>();
       roadmap.getSpanningTree(source, junctionDist, null);
-      double lengthAvg = roadmap.getLengthTotal() / roadmap.getRoadSegments().size();
+      long lengthAvg = roadmap.getLengthTotal() / roadmap.getRoadSegments().size();
       for (int j = 0; j < segmentCount; j++) {
         RoadSegment seg = segments[j];
-        double dist = (j == centerNum) ? 0 : Math.min(junctionDist.get(seg.getSourceJunction().getId()).distance, junctionDist.get(seg.getTargetJunction().getId()).distance) + seg.getLength() / 2;
-        segmentWeights[j] += Math.pow(coeff, dist / lengthAvg);
+        int dist = (j == centerNum) ? 0 : Math.min(junctionDist.get(seg.getSourceJunction().getId()).distance, junctionDist.get(seg.getTargetJunction().getId()).distance) + seg.getLength() / 2;
+        segmentWeights[j] += Math.pow(coeff, dist / (double) lengthAvg);
       }
     }
     // System.out.println("done.");
@@ -71,6 +71,6 @@ public class HotspotRoadnetLocationDistribution implements ILocationDistribution
       seg = segments[i];
     }
 
-    return new RoadnetVector(seg, (float) (rnd.nextDouble() * seg.getLength()));
+    return new RoadnetVector(seg, (int) (rnd.nextDouble() * seg.getLength()));
   }
 }

@@ -1,4 +1,4 @@
-// Copyright (c) 2009, Georgia Tech Research Corporation
+// Copyright (c) 2012, Georgia Tech Research Corporation
 // Authors:
 //   Peter Pesti (pesti@gatech.edu)
 //
@@ -17,7 +17,7 @@ public class RandomWaypoint_IndividualMobilityModel extends IndividualMobilityMo
 
   protected CartesianVector location;
   protected CartesianVector destination;
-  protected CartesianVector v; // [m/s]
+  protected CartesianVector v; // [mm/s]
   protected SimAgent agent;
 
   private ILocationDistribution locationDistribution;
@@ -37,7 +37,7 @@ public class RandomWaypoint_IndividualMobilityModel extends IndividualMobilityMo
     // set new location:
     if (location != null) {
       // move to destination:
-      timestamp += (long) (1000 * location.vectorTo(destination).getLength() / v.getLength());
+      timestamp += (long) (1000 * (double) location.vectorTo(destination).getLength() / v.getLength());
       location = destination;
     } else {
       // set initial location:

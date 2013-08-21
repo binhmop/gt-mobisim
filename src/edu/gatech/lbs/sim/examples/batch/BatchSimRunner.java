@@ -1,4 +1,4 @@
-// Copyright (c) 2009, Georgia Tech Research Corporation
+// Copyright (c) 2012, Georgia Tech Research Corporation
 // Authors:
 //   Peter Pesti (pesti@gatech.edu)
 //
@@ -161,7 +161,9 @@ public class BatchSimRunner {
   }
 
   public static void stopHttpServer() {
-    simMonitorHttpServer.server.stop(0);
+    if (simMonitorHttpServer.server != null) {
+      simMonitorHttpServer.server.stop(0);
+    }
 
     try {
       Process p = Runtime.getRuntime().exec("./mailme");

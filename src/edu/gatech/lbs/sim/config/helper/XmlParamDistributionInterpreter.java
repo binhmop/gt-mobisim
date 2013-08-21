@@ -1,4 +1,4 @@
-// Copyright (c) 2009, Georgia Tech Research Corporation
+// Copyright (c) 2012, Georgia Tech Research Corporation
 // Authors:
 //   Peter Pesti (pesti@gatech.edu)
 //
@@ -38,22 +38,22 @@ public class XmlParamDistributionInterpreter implements IXmlConfigInterpreter {
 
     if (paramDistributionType.equalsIgnoreCase(UniformParamDistribution.xmlName)) {
       String maxStr = paramDistributionNode.getAttribute("max");
-      double max = maxStr.length() > 0 ? pparser.parse(maxStr) : Double.MAX_VALUE;
+      int max = maxStr.length() > 0 ? pparser.parse(maxStr) : Integer.MAX_VALUE;
 
       String minStr = paramDistributionNode.getAttribute("min");
-      double min = minStr.length() > 0 ? pparser.parse(minStr) : Double.MIN_VALUE;
+      int min = minStr.length() > 0 ? pparser.parse(minStr) : Integer.MIN_VALUE;
 
       paramDistribution = new UniformParamDistribution(min, max);
 
     } else if (paramDistributionType.equalsIgnoreCase(GaussianParamDistribution.xmlName)) {
-      double mean = pparser.parse(paramDistributionNode.getAttribute("mean"));
-      double dev = pparser.parse(paramDistributionNode.getAttribute("stdev"));
+      int mean = pparser.parse(paramDistributionNode.getAttribute("mean"));
+      int dev = pparser.parse(paramDistributionNode.getAttribute("stdev"));
 
       String maxStr = paramDistributionNode.getAttribute("max");
-      double max = maxStr.length() > 0 ? pparser.parse(maxStr) : Double.MAX_VALUE;
+      int max = maxStr.length() > 0 ? pparser.parse(maxStr) : Integer.MAX_VALUE;
 
       String minStr = paramDistributionNode.getAttribute("min");
-      double min = minStr.length() > 0 ? pparser.parse(minStr) : 0;
+      int min = minStr.length() > 0 ? pparser.parse(minStr) : 0;
 
       paramDistribution = new GaussianParamDistribution(mean, dev, min, max);
 

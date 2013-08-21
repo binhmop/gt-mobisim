@@ -1,4 +1,4 @@
-// Copyright (c) 2009, Georgia Tech Research Corporation
+// Copyright (c) 2012, Georgia Tech Research Corporation
 // Authors:
 //   Peter Pesti (pesti@gatech.edu)
 //
@@ -8,7 +8,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 public interface IVector {
-  public double getLength();
+  public long getLength();
 
   public IVector times(double d);
 

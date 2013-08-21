@@ -1,4 +1,4 @@
-// Copyright (c) 2009, Georgia Tech Research Corporation
+// Copyright (c) 2012, Georgia Tech Research Corporation
 // Authors:
 //   Peter Pesti (pesti@gatech.edu)
 //
@@ -37,7 +37,10 @@ public class XmlQueryModelInterpreter implements IXmlConfigInterpreter {
 
     if (querymodelType.equalsIgnoreCase(GlobalFixedNumberRangeQueryModel.getXmlName())) {
       String queryCountStr = querymodelNode.getAttribute("count");
-      int queryCount = Integer.parseInt(queryCountStr);
+      int queryCount = Integer.parseInt(queryCountStr.replace("%", ""));
+      if (queryCountStr.contains("%")) {
+        queryCount *= -1; // % comes with a uniform distribution of queries over agents
+      }
 
       // radius distribution:
       Element rangeDistributionNode = (Element) querymodelNode.getElementsByTagName("radius").item(0);

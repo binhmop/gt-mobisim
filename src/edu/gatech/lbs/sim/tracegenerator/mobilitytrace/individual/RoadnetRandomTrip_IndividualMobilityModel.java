@@ -1,4 +1,4 @@
-// Copyright (c) 2009, Georgia Tech Research Corporation
+// Copyright (c) 2012, Georgia Tech Research Corporation
 // Authors:
 //   Peter Pesti (pesti@gatech.edu)
 //
@@ -20,7 +20,7 @@ public class RoadnetRandomTrip_IndividualMobilityModel extends IndividualMobilit
 
   protected RoadnetVector location;
   protected RoadnetVector destination; // next waypoint (junction)
-  protected RoadnetVector v; // [m/s]
+  protected RoadnetVector v; // [mm/s]
   protected Route route;
   protected int routeSegment;
   protected SimAgent agent;
@@ -73,7 +73,7 @@ public class RoadnetRandomTrip_IndividualMobilityModel extends IndividualMobilit
       destination = route.getTarget();
     }
 
-    v = new RoadnetVector(location.getRoadSegment(), (destination.getProgress() > location.getProgress() ? +1 : -1) * (float) Math.abs(speedDistribution.getNextValue(location)));
+    v = new RoadnetVector(location.getRoadSegment(), (destination.getProgress() > location.getProgress() ? +1 : -1) * (int) Math.abs(speedDistribution.getNextValue(location)));
   }
 
   protected void planNewRoute() {
@@ -97,7 +97,7 @@ public class RoadnetRandomTrip_IndividualMobilityModel extends IndividualMobilit
     // we are currently moving:
     if (v.getLength() != 0) {
       // move to destination:
-      timestamp += (long) (1000 * location.vectorTo(destination).getLength() / v.getLength());
+      timestamp += (long) (1000 * (double) location.vectorTo(destination).getLength() / v.getLength());
       location = destination;
 
       // move to next segment in route:
@@ -127,14 +127,14 @@ public class RoadnetRandomTrip_IndividualMobilityModel extends IndividualMobilit
       if (route == null) {
         // park before starting to move:
         if (parkingTimeDistribution != null) {
-          timestamp += (long) (1000 * parkingTimeDistribution.getNextValue(location));
+          timestamp += parkingTimeDistribution.getNextValue(location);
         }
         planNewRoute();
       }
 
       // stop at intersection before starting to move:
       if (stoppingTimeDistribution != null) {
-        timestamp += (long) (1000 * stoppingTimeDistribution.getNextValue(location));
+        timestamp += stoppingTimeDistribution.getNextValue(location);
       }
 
       startMovingOnNewSegment();
