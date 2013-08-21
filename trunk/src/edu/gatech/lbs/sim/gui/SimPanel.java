@@ -1,4 +1,4 @@
-// Copyright (c) 2009, Georgia Tech Research Corporation
+// Copyright (c) 2012, Georgia Tech Research Corporation
 // Authors:
 //   Peter Pesti (pesti@gatech.edu)
 //
@@ -19,6 +19,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
 import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
@@ -36,7 +37,7 @@ import edu.gatech.lbs.core.world.roadnet.RoadMap;
 import edu.gatech.lbs.sim.Simulation;
 import edu.gatech.lbs.sim.gui.drawer.IDrawer;
 
-public class SimPanel extends JPanel implements ActionListener {
+public class SimPanel extends JPanel {
   protected Image image;
 
   protected boolean doPause = false;
@@ -45,7 +46,7 @@ public class SimPanel extends JPanel implements ActionListener {
 
   protected Simulation sim;
 
-  protected double metersPerPixel;
+  public double mmPerPixel;
   protected final double zoomRate = 2;
 
   protected BoundingBox bounds;
@@ -56,10 +57,6 @@ public class SimPanel extends JPanel implements ActionListener {
 
     SimPanel panel = new SimPanel(sim);
     frame.add(panel);
-
-    JButton pauseButton = new JButton("|| >");
-    pauseButton.addActionListener(panel);
-    panel.add(pauseButton);
 
     frame.pack();
     frame.setVisible(true);
@@ -72,6 +69,15 @@ public class SimPanel extends JPanel implements ActionListener {
     setBorder(BorderFactory.createLineBorder(Color.black));
     setBackground(Color.WHITE);
 
+    JButton pauseButton = new JButton("|| >");
+    pauseButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        doPause = !doPause;
+      }
+    });
+    add(pauseButton);
+
+    setFocusable(true);
     this.addKeyListener(new KeyAdapter() {
       public void keyReleased(KeyEvent e) {
       }
@@ -80,29 +86,58 @@ public class SimPanel extends JPanel implements ActionListener {
       }
 
       public void keyPressed(KeyEvent e) {
-        switch (e.getKeyChar()) {
-        case 'a':
-          metersPerPixel /= 1.1;
+        long x0 = bounds.getX0();
+        long y0 = bounds.getY0();
+        double m = 1;
+        switch (e.getKeyCode()) {
+        case KeyEvent.VK_LEFT:
+          x0 -= bounds.getWidth() / 10;
           break;
-        case 's':
-          metersPerPixel *= 1.1;
+        case KeyEvent.VK_RIGHT:
+          x0 += bounds.getWidth() / 10;
+          break;
+        case KeyEvent.VK_UP:
+          y0 += bounds.getHeight() / 10;
+          break;
+        case KeyEvent.VK_DOWN:
+          y0 -= bounds.getHeight() / 10;
+          break;
+        case KeyEvent.VK_ADD:
+          m /= zoomRate;
+          break;
+        case KeyEvent.VK_SUBTRACT:
+          m *= zoomRate;
+          break;
+        case KeyEvent.VK_SPACE:
+          doPause = !doPause;
           break;
         }
+        bounds = new BoundingBox(x0 + (long) (bounds.getWidth() * (1 - m) / 2), y0 + (long) (bounds.getHeight() * (1 - m) / 2), (long) (bounds.getWidth() * m), (long) (bounds.getHeight() * m));
       }
     });
 
     this.addMouseListener(new MouseAdapter() {
+
       public void mouseClicked(MouseEvent e) {
-        CartesianVector loc = getLocation(bounds, new Point(e.getX(), e.getY()));
         // JOptionPane.showMessageDialog(null, e.getLocationOnScreen().x + " px, " + e.getLocationOnScreen().y + " px\n" + loc + "\n" + loc.toRoadnetVector((RoadMap) sim.getWorld()));
+
+        double m = 1;
         switch (e.getButton()) {
         case MouseEvent.BUTTON1:
-          bounds = new BoundingBox(loc.getX() - (loc.getX() - bounds.getX0()) / zoomRate, loc.getY() - (loc.getY() - bounds.getY0()) / zoomRate, bounds.getWidth() / zoomRate, bounds.getHeight() / zoomRate);
+          m /= zoomRate;
           break;
         case MouseEvent.BUTTON3:
-          bounds = new BoundingBox(loc.getX() - (loc.getX() - bounds.getX0()) * zoomRate, loc.getY() - (loc.getY() - bounds.getY0()) * zoomRate, bounds.getWidth() * zoomRate, bounds.getHeight() * zoomRate);
+          m *= zoomRate;
           break;
         }
+        zoom(getLocation(bounds, new Point(e.getX(), e.getY())), m);
+      }
+    });
+
+    this.addMouseWheelListener(new MouseAdapter() {
+      public void mouseWheelMoved(MouseWheelEvent e) {
+        double m = (e.getWheelRotation() > 0 ? zoomRate : 1 / zoomRate);
+        zoom(getLocation(bounds, new Point(e.getX(), e.getY())), m);
       }
     });
 
@@ -117,16 +152,19 @@ public class SimPanel extends JPanel implements ActionListener {
     image = null;
   }
 
+  protected void zoom(CartesianVector center, double times) {
+    bounds = new BoundingBox((long) (center.getX() - (center.getX() - bounds.getX0()) * times), (long) (center.getY() - (center.getY() - bounds.getY0()) * times), (long) (bounds.getWidth() * times), (long) (bounds.getHeight() * times));
+  }
+
   public void setDrawers(List<IDrawer> drawers) {
     this.drawers = drawers;
   }
 
   public Dimension getPreferredSize() {
-    // get the screen size:
     Toolkit toolkit = Toolkit.getDefaultToolkit();
     Dimension screenSize = toolkit.getScreenSize();
 
-    return new Dimension(670, screenSize.height);
+    return new Dimension(screenSize.width - 10, screenSize.height - 60);
   }
 
   public void paintComponent(Graphics g) {
@@ -150,8 +188,9 @@ public class SimPanel extends JPanel implements ActionListener {
       bounds = roadmap.getBounds();
     }
 
-    // metersPerPixel = 0.1 * Math.max(bounds.getWidth() / getWidth(), bounds.getHeight() / getHeight());
-    metersPerPixel = Math.max(bounds.getWidth() / getWidth(), bounds.getHeight() / getHeight());
+    mmPerPixel = Math.max(bounds.getWidth() / getWidth(), bounds.getHeight() / getHeight());
+    // Ensure that mm/pixel is a power of 2.
+    mmPerPixel = Math.pow(2, 1 + (int) (Math.log(mmPerPixel) / Math.log(2)));
 
     for (IDrawer drawer : drawers) {
       drawer.draw(g);
@@ -190,16 +229,10 @@ public class SimPanel extends JPanel implements ActionListener {
   }
 
   protected Point getPixel(BoundingBox bounds, CartesianVector vector) {
-    // return new Point((int) ((vector.getX() - bounds.getX0() - 4500) / metersPerPixel), (int) ((bounds.getNorthBoundary() - vector.getY() - 9000) / metersPerPixel));
-    return new Point((int) ((vector.getX() - bounds.getX0()) / metersPerPixel), (int) ((bounds.getNorthBoundary() - vector.getY()) / metersPerPixel));
+    return new Point((int) ((vector.getX() - bounds.getX0()) / mmPerPixel), (int) ((bounds.getNorthBoundary() - vector.getY()) / mmPerPixel));
   }
 
   public CartesianVector getLocation(BoundingBox bounds, Point px) {
-    return new CartesianVector(px.x * metersPerPixel + bounds.getX0(), bounds.getNorthBoundary() - px.y * metersPerPixel);
-  }
-
-  // pause button:
-  public void actionPerformed(ActionEvent e) {
-    doPause = !doPause;
+    return new CartesianVector((long) (px.x * mmPerPixel + bounds.getX0()), (long) (bounds.getNorthBoundary() - px.y * mmPerPixel));
   }
 }
