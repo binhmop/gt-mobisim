@@ -23,10 +23,10 @@
       # Create a run target in Eclipse:
         # Select _gt-mobisim/edu.gatech.lbs.sim.Simulation_, then right click/_Run As/Run Configurations..._
         # on the _Arguments_ tab:
-          # _Program arguments:_ `jnlp-demo.xml`
+          # _Program arguments:_ `web-demo.xml`
           # _VM arguments:_ `-Xmx500M` (increase for simulations with many agents)
           # _Working directory: Other:_ `${workspace_loc:gt-mobisim/configs}`
           # _Run_
     # Just use the ready-made _gtmobisim.jar_ (no Eclipse):
       # Download and unpack the latest zip into a _gt-mobisim_ directory: [http://code.google.com/p/gt-mobisim/downloads/list]
-      # In the _configs_ subdirectory run:<br> `java -Xmx500M -cp "../thirdparty/*.jar" -jar ../gtmobisim.jar jnlp-demo.xml` <br> You could also try `runjar.bat jnlp-demo.xml` for the same result. <br> Also consider the example commands that run the [ExampleCode]s
+      # In the _configs_ subdirectory run:<br> `java -Xmx500M -cp "../thirdparty/*.jar" -jar ../gtmobisim.jar web-demo.xml` <br> You could also try `runjar.bat web-demo.xml` for the same result. <br> Also consider the example commands that run the [ExampleCode]s
