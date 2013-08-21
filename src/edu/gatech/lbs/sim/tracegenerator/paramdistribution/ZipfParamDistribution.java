@@ -13,9 +13,6 @@ import edu.gatech.lbs.core.vector.IVector;
  * Bugra Gedik
  * IBM T.J. Watson Research Center
  */
-/**
- * @author bgedik: Bugra Gedik
- */
 public class ZipfParamDistribution implements IParamDistribution {
   public static final String xmlName = "zipf";
 
