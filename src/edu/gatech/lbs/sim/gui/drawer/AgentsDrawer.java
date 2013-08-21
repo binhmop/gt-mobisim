@@ -1,4 +1,4 @@
-// Copyright (c) 2009, Georgia Tech Research Corporation
+// Copyright (c) 2012, Georgia Tech Research Corporation
 // Authors:
 //   Peter Pesti (pesti@gatech.edu)
 //
@@ -31,13 +31,13 @@ public class AgentsDrawer implements IDrawer {
     for (SimAgent agent : agents) {
       IVector loc = agent.getLocation();
       Point p0 = panel.getPixel(loc.toCartesianVector());
-      // g.drawOval(p0.x - 1, p0.y - 1, 2, 2);
-      g.drawLine(p0.x - 1, p0.y - 1, p0.x + 1, p0.y + 1);
-      g.drawLine(p0.x - 1, p0.y + 1, p0.x + 1, p0.y - 1);
+      g.fillOval(p0.x - 2, p0.y - 2, 5, 5);
+      // g.drawLine(p0.x - 1, p0.y - 1, p0.x + 1, p0.y + 1);
+      // g.drawLine(p0.x - 1, p0.y + 1, p0.x + 1, p0.y - 1);
 
       if (isAgentVectorOn) {
         IVector v = agent.getVelocity();
-        Point p1 = panel.getPixel(loc.toCartesianVector().add(loc.toRoadnetVector().toTangentVector().times(v.getLength() * 5).toCartesianVector()).toCartesianVector());
+        Point p1 = panel.getPixel(loc.toCartesianVector().add(loc.toRoadnetVector().toTangentVector().times(1e-6 * v.getLength() * 5).toCartesianVector()).toCartesianVector());
         g.drawLine(p0.x, p0.y, p1.x, p1.y);
       }
     }
