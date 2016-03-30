@@ -1,0 +1,4 @@
+# Some notes #
+  * Object movements are independent of each other, so 2 objects can even be on top of each other.
+
+  * You can change the # of objects in the config file. However, the trace file is not overwritten/regenerated if it already exists. If you change the # of objects in the config file, but use a trace file that was generated with a different # of objects, some objects might not have traces, which can cause an exception. You may want to delete the trace manually, when changing the # of objects. Also, you can specify the following attribute:  overwrite="yes"  , for any tag in the xml, where there is also a    filename=""   attribute; this will cause the trace to be overwritten/regenerated every time you rerun the simulator. In the code: http://www.google.com/codesearch?q=overwrite+package:http://gt-mobisim\.googlecode\.com&origq=overwrite&btnG=Search+Trunk
