@@ -8,6 +8,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -15,7 +16,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeMap;
-
 import edu.gatech.lbs.core.world.IWorld;
 import edu.gatech.lbs.sim.Simulation;
 import edu.gatech.lbs.sim.scheduling.event.SimEvent;
@@ -168,5 +168,13 @@ public class SimEventQueue {
 
   public int size() {
     return elementCount;
+  }
+
+  public void saveToTxt(PrintWriter out) throws IOException {
+    for (LinkedList<SimEvent> element : eventMap.values()) {
+      for (SimEvent event : element) {
+        event.saveToTxt(out);
+      }
+    }
   }
 }

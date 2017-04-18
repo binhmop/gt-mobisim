@@ -6,6 +6,7 @@ package edu.gatech.lbs.core.vector;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 
 public interface IVector {
   public long getLength();
@@ -25,4 +26,6 @@ public interface IVector {
   public void saveTo(DataOutputStream out) throws IOException;
 
   public byte getTypeCode();
+
+  public void saveToTxt(PrintWriter out) throws IOException;
 }

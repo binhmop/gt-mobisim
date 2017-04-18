@@ -7,7 +7,7 @@ package edu.gatech.lbs.core.vector;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-
+import java.io.PrintWriter;
 import edu.gatech.lbs.core.world.roadnet.RoadMap;
 
 public class CartesianVector implements IVector {
@@ -170,6 +170,11 @@ public class CartesianVector implements IVector {
     out.writeLong(y);
   }
 
+  public void saveToTxt(PrintWriter out) throws IOException{
+    out.print(String.format("%.3f", x / 1000.0)+ " ");
+    out.print(String.format("%.3f", y / 1000.0)+ " ");
+  }
+  
   public byte getTypeCode() {
     return typeCode;
   }

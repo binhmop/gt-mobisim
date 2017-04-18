@@ -9,28 +9,27 @@ import java.awt.Graphics;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
-
+import edu.gatech.lbs.core.world.IWorld;
 import edu.gatech.lbs.core.world.roadnet.RoadJunction;
 import edu.gatech.lbs.core.world.roadnet.RoadMap;
 import edu.gatech.lbs.core.world.roadnet.RoadSegment;
 import edu.gatech.lbs.core.world.roadnet.partition.Partition;
-import edu.gatech.lbs.sim.Simulation;
 import edu.gatech.lbs.sim.gui.SimPanel;
 
 public class RoadMapDrawer implements IDrawer {
   public boolean isPartitionBordersOn = false;
 
-  private Simulation sim;
+  private IWorld world;
   private SimPanel panel;
   private List<Color> partitionColors;
 
-  public RoadMapDrawer(Simulation sim, SimPanel panel) {
-    this.sim = sim;
+  public RoadMapDrawer(IWorld world, SimPanel panel) {
+    this.world = world;
     this.panel = panel;
   }
 
   public void draw(Graphics g) {
-    RoadMap roadmap = (RoadMap) sim.getWorld();
+    RoadMap roadmap = (RoadMap) world;
 
     if (partitionColors == null) {
       partitionColors = new ArrayList<Color>();

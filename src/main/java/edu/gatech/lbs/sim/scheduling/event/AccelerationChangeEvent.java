@@ -7,7 +7,7 @@ package edu.gatech.lbs.sim.scheduling.event;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-
+import java.io.PrintWriter;
 import edu.gatech.lbs.core.vector.IVector;
 import edu.gatech.lbs.core.vector.IVectorFactory;
 import edu.gatech.lbs.sim.Simulation;
@@ -54,6 +54,7 @@ public class AccelerationChangeEvent extends SimEvent implements IMobilityChange
 
   public void execute() {
     sim.updateAgentIndex(agent, location);
+    sim.updateTrajectories(agent, location);
     agent.getSimPhysicalAttributes().setEvent(this);
   }
 
@@ -76,5 +77,11 @@ public class AccelerationChangeEvent extends SimEvent implements IMobilityChange
   public String toString() {
     return "A";
     // return "[" + (char) getTypeCode() + "@" + timestamp + ", l=" + location + ",v=" + velocity + ",a=" + acceleration + "]";
+  }
+
+  @Override
+  public void saveToTxt(PrintWriter out) throws IOException {
+    // TODO Auto-generated method stub
+    
   }
 }

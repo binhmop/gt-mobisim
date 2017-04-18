@@ -6,7 +6,7 @@ package edu.gatech.lbs.sim.scheduling.event;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
-
+import java.io.PrintWriter;
 import edu.gatech.lbs.sim.Simulation;
 import edu.gatech.lbs.sim.gui.SimPanel;
 
@@ -43,5 +43,11 @@ public class DrawGUIEvent extends SimEvent {
 
   public String toString() {
     return null;
+  }
+
+  @Override
+  public void saveToTxt(PrintWriter out) throws IOException {
+    // TODO Auto-generated method stub
+    
   }
 }

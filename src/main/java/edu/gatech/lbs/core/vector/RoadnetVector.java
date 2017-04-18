@@ -4,10 +4,11 @@
 //
 package edu.gatech.lbs.core.vector;
 
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-
+import java.io.PrintWriter;
 import edu.gatech.lbs.core.world.roadnet.RoadMap;
 import edu.gatech.lbs.core.world.roadnet.RoadSegment;
 
@@ -16,6 +17,7 @@ public class RoadnetVector implements IVector {
 
   protected RoadSegment roadsegment;
   protected int progress; // [mm], [mm/s], [mm/s^2] along the dimension defined by the road segment
+
 
   public RoadnetVector(RoadSegment roadsegment, int progress) {
     this.roadsegment = roadsegment;
@@ -90,12 +92,13 @@ public class RoadnetVector implements IVector {
 
   @Override
   public String toString() {
-    return String.format("(seg%d%s@%d/%d)", roadsegment.getId(), (roadsegment.isLoop() ? "L" : ""), progress, roadsegment.getLength());
+    return String.format("(seg%d%s@%d/%d)", roadsegment.getId(), (roadsegment.isLoop() ? "L" : ""), progress,
+        roadsegment.getLength());
   }
 
   /**
-   * Simple equality-check.
-   * Returns false for two locations that represent the same junction, if using different segments.
+   * Simple equality-check. Returns false for two locations that represent the same junction, if using different
+   * segments.
    */
   @Override
   public boolean equals(Object o) {
@@ -108,5 +111,13 @@ public class RoadnetVector implements IVector {
 
   public byte getTypeCode() {
     return typeCode;
+  }
+
+  public void saveToTxt(PrintWriter out) throws IOException {
+    // out.print(Byte.toString(typeCode)+ " ");
+    // out.print("r ");
+    out.print(Integer.toString(roadsegment.getId()) + " ");
+    // out.print(Float.toString(progress)+ " ");
+
   }
 }

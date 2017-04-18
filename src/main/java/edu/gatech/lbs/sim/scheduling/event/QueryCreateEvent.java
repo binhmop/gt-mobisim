@@ -7,7 +7,7 @@ package edu.gatech.lbs.sim.scheduling.event;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-
+import java.io.PrintWriter;
 import edu.gatech.lbs.core.query.LocationBasedQuery;
 import edu.gatech.lbs.core.query.LocationBasedQueryFactory;
 import edu.gatech.lbs.core.query.QueryKey;
@@ -53,5 +53,11 @@ public class QueryCreateEvent extends SimEvent {
 
   public String toString() {
     return "[" + (char) getTypeCode() + "@" + timestamp + ", simKey=" + simKey + "]";
+  }
+
+  @Override
+  public void saveToTxt(PrintWriter out) throws IOException {
+    // TODO Auto-generated method stub
+    
   }
 }
