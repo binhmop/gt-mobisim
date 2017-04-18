@@ -5,7 +5,7 @@
 	<groupId>edu.gatech.lbs</groupId>
 	<artifactId>gt-mobisim</artifactId>
 	<packaging>jar</packaging>
-	<version>1.1-SNAPSHOT</version>
+	<version>1.1</version>
 	<name>gt-mobisim</name>
 	<description>Simulator for generating mobility traces and query traces for large numbers of mobile agents moving in a road network.</description>
 	<url>http://github.com/binhmop/gt-mobisim</url>
