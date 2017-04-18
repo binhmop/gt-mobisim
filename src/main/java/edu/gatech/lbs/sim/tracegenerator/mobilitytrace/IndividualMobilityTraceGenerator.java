@@ -4,12 +4,14 @@
 //
 package edu.gatech.lbs.sim.tracegenerator.mobilitytrace;
 
+
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
-
 import edu.gatech.lbs.sim.scheduling.SimEventQueue;
 import edu.gatech.lbs.sim.scheduling.event.SimEvent;
 import edu.gatech.lbs.sim.tracegenerator.ITraceGenerator;
@@ -20,7 +22,9 @@ public class IndividualMobilityTraceGenerator implements ITraceGenerator {
   protected long simEndTime;
   protected List<IndividualMobilityModel> mobilityModels;
 
-  public IndividualMobilityTraceGenerator(long simStartTime, long simEndTime, List<IndividualMobilityModel> mobilityModels) {
+
+  public IndividualMobilityTraceGenerator(long simStartTime, long simEndTime,
+      List<IndividualMobilityModel> mobilityModels) {
     this.simStartTime = simStartTime;
     this.simEndTime = simEndTime;
     this.mobilityModels = mobilityModels;
@@ -30,13 +34,15 @@ public class IndividualMobilityTraceGenerator implements ITraceGenerator {
   // -trace loading is also done in scheduled chunks, so is a low-memory operation
   public void generateTrace(String traceFilename) throws IOException {
     DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(traceFilename)));
+    PrintWriter outTxt = new PrintWriter(new FileWriter(traceFilename + ".txt"));
 
     long wallStartTime = System.nanoTime();
 
     SimEventQueue overflowQueue = new SimEventQueue();
     int eventCount = 0;
     long simStageLength = (long) (1000 * 60 * 5.0 / (mobilityModels.size() / 10000.0)); // stage length [ms]
-    for (long simStageEndTime = Math.min(simEndTime, simStageLength); simStageEndTime <= simEndTime; simStageEndTime = Math.min(simEndTime, simStageEndTime + simStageLength)) {
+    for (long simStageEndTime = Math.min(simEndTime, simStageLength); simStageEndTime <= simEndTime; simStageEndTime = Math
+        .min(simEndTime, simStageEndTime + simStageLength)) {
       SimEventQueue queue = new SimEventQueue();
 
       // sift thru the overflow queue from previous stage, and separate events belonging
@@ -80,7 +86,9 @@ public class IndividualMobilityTraceGenerator implements ITraceGenerator {
       } while (simStageEndedCount < mobilityModels.size());
 
       eventCount += queue.size();
-      queue.saveTo(out);
+      queue.saveTo(out);// to binary file
+
+      queue.saveToTxt(outTxt);// to text file
 
       System.out.println("  " + String.format("%.2f", simStageEndTime / 60.0 / 1000) + " simulated minutes elapsed...");
 
@@ -91,63 +99,39 @@ public class IndividualMobilityTraceGenerator implements ITraceGenerator {
     }
 
     double simSeconds = (simEndTime - simStartTime) / (1000.0);
-    System.out.println("  done. (" + eventCount + " trace records, " + String.format("%.2f", simSeconds / ((double) eventCount / mobilityModels.size())) + " simulated seconds/trace record)");
+    System.out.println("  done. (" + eventCount + " trace records, "
+        + String.format("%.2f", simSeconds / ((double) eventCount / mobilityModels.size()))
+        + " simulated seconds/trace record)");
     double simToWallSpeedRatio = (simEndTime - simStartTime) / ((System.nanoTime() - wallStartTime) / 1e6);
-    System.out.println("  Speed: " + String.format("%.1f", simToWallSpeedRatio) + "x realtime (" + String.format("%.1f", simToWallSpeedRatio / 60.0) + " simulated hours/wall minute)");
+    System.out.println("  Speed: " + String.format("%.1f", simToWallSpeedRatio) + "x realtime ("
+        + String.format("%.1f", simToWallSpeedRatio / 60.0) + " simulated hours/wall minute)");
     out.close();
+    outTxt.close();
   }
 
   /*
-  public void writeKmlTrace(){
-  	// kml trace:
-  	if (i == 0) {
-  		// write KML trace:
-  		try {
-  			BufferedWriter kml = new BufferedWriter(new FileWriter(traceFilename + ".kml"));
-  			kml.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-  			kml.write("<kml xmlns=\"http://www.opengis.net/kml/2.2\">\n");
-  			kml.write("<Document>\n");
-
-  			kml.write("<Style id=\"user\">\n");
-  			kml.write("<IconStyle>");
-  			kml.write("<color>ffffffff</color>");
-  			kml.write("<Icon>");
-  			kml.write("<href>http://maps.google.com/mapfiles/kml/shapes/truck.png</href>");
-  			kml.write("</Icon>");
-  			kml.write("</IconStyle>");
-  			kml.write("</Style>\n");
-
-  			kml.write("<Folder>\n");
-  			// kml.write("<name>User #" + user.getUID() + "</name>\n");
-  			IMobilityChangeEvent event0 = (IMobilityChangeEvent) trace.pop();
-  			IMobilityChangeEvent nextEvent = (IMobilityChangeEvent) trace.pop();
-  			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ssZ");
-  			while (event0 != null) {
-  				kml.write("<Placemark>\n");
-  				kml.write("<styleUrl>#user</styleUrl>\n");
-  				kml.write("<TimeSpan>\n");
-  				kml.write("<begin>" + dateFormat.format(new Date(event0.getTimestamp())) + "</begin>\n");
-  				kml.write("<end>" + dateFormat.format(new Date((nextEvent != null ? nextEvent.getTimestamp() : simEndTime))) + "</end>\n");
-  				kml.write("</TimeSpan>\n");
-  				kml.write("<Point>\n");
-  				CartesianVector loc = event0.getLocation().toCartesianVector();
-  				kml.write("<coordinates>" + loc.getLongitude() + "," + loc.getLatitude() + "</coordinates>\n");
-  				kml.write("</Point>\n");
-  				kml.write("</Placemark>\n");
-
-  				event0 = nextEvent;
-  				if (event0 != null) {
-  					nextEvent = (IMobilityChangeEvent) trace.pop();
-  				}
-  			}
-  			kml.write("</Folder>\n");
-
-  			kml.write("</Document>\n");
-  			kml.write("</kml>\n");
-  			kml.close();
-  		} catch (IOException e) {
-  			System.err.println("Error: " + e.getMessage());
-  		}
-  	}
-  }*/
+   * public void writeKmlTrace(){ // kml trace: if (i == 0) { // write KML trace: try { BufferedWriter kml = new
+   * BufferedWriter(new FileWriter(traceFilename + ".kml")); kml.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+   * kml.write("<kml xmlns=\"http://www.opengis.net/kml/2.2\">\n"); kml.write("<Document>\n");
+   * 
+   * kml.write("<Style id=\"user\">\n"); kml.write("<IconStyle>"); kml.write("<color>ffffffff</color>");
+   * kml.write("<Icon>"); kml.write("<href>http://maps.google.com/mapfiles/kml/shapes/truck.png</href>");
+   * kml.write("</Icon>"); kml.write("</IconStyle>"); kml.write("</Style>\n");
+   * 
+   * kml.write("<Folder>\n"); // kml.write("<name>User #" + user.getUID() + "</name>\n"); IMobilityChangeEvent event0 =
+   * (IMobilityChangeEvent) trace.pop(); IMobilityChangeEvent nextEvent = (IMobilityChangeEvent) trace.pop();
+   * SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ssZ"); while (event0 != null) {
+   * kml.write("<Placemark>\n"); kml.write("<styleUrl>#user</styleUrl>\n"); kml.write("<TimeSpan>\n");
+   * kml.write("<begin>" + dateFormat.format(new Date(event0.getTimestamp())) + "</begin>\n"); kml.write("<end>" +
+   * dateFormat.format(new Date((nextEvent != null ? nextEvent.getTimestamp() : simEndTime))) + "</end>\n");
+   * kml.write("</TimeSpan>\n"); kml.write("<Point>\n"); CartesianVector loc = event0.getLocation().toCartesianVector();
+   * kml.write("<coordinates>" + loc.getLongitude() + "," + loc.getLatitude() + "</coordinates>\n");
+   * kml.write("</Point>\n"); kml.write("</Placemark>\n");
+   * 
+   * event0 = nextEvent; if (event0 != null) { nextEvent = (IMobilityChangeEvent) trace.pop(); } }
+   * kml.write("</Folder>\n");
+   * 
+   * kml.write("</Document>\n"); kml.write("</kml>\n"); kml.close(); } catch (IOException e) {
+   * System.err.println("Error: " + e.getMessage()); } } }
+   */
 }

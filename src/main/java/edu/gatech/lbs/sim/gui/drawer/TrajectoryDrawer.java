@@ -12,21 +12,21 @@ import java.util.Random;
 
 public class TrajectoryDrawer implements IDrawer {
   private SimPanel panel;
-  private List<IVector> points;
+  private List<IVector> locs;
   private Color color;
   private int thickness = 2;
 
 
   public TrajectoryDrawer(SimPanel panel, List<IVector> points, Color color) {
     this.panel = panel;
-    this.points = points;
+    this.locs = points;
     this.color = color;
   }
 
   public void draw(Graphics g) {
-    for (int i = 0; i < points.size() - 1; i++) {
-      Point p0 = panel.getPixel(points.get(i).toCartesianVector());
-      Point p1 = panel.getPixel(points.get(i + 1).toCartesianVector());
+    for (int i = 0; i < locs.size() - 1; i++) {
+      Point p0 = panel.getPixel(locs.get(i).toCartesianVector());
+      Point p1 = panel.getPixel(locs.get(i + 1).toCartesianVector());
       drawThickLine(g, p0.x, p0.y, p1.x, p1.y, thickness, color);
       // g.setColor(color);
       // g.drawLine(p0.x, p0.y, p1.x, p1.y);
@@ -73,7 +73,7 @@ public class TrajectoryDrawer implements IDrawer {
   
   public void annotate(String txt, int fontSize, Graphics g, Random numGen) {
     g.setFont(new Font(null, Font.BOLD, fontSize));
-    Point p = panel.getPixel(points.get(numGen.nextInt(points.size())).toCartesianVector());
+    Point p = panel.getPixel(locs.get(numGen.nextInt(locs.size())).toCartesianVector());
     g.setColor(Color.black);
     g.drawString(txt, (int) (p.getX()), (int) p.getY());
   }

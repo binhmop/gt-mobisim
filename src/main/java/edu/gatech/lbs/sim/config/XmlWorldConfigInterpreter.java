@@ -50,6 +50,11 @@ public class XmlWorldConfigInterpreter implements IXmlConfigInterpreter {
   }
 
   public void initFromXmlElement(Element rootNode, Simulation sim) throws IOException {
+    IWorld world = initFromXmlElement(rootNode);
+    sim.setWorld(world);
+  }
+  
+  public IWorld initFromXmlElement(Element rootNode) throws IOException {
     Element worldNode = (Element) rootNode.getElementsByTagName("world").item(0);
 
     IWorld world = null;
@@ -243,6 +248,6 @@ public class XmlWorldConfigInterpreter implements IXmlConfigInterpreter {
       System.exit(-1);
     }
 
-    sim.setWorld(world);
+    return world;
   }
 }

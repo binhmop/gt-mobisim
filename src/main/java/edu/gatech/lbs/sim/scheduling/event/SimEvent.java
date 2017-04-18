@@ -5,10 +5,10 @@
 package edu.gatech.lbs.sim.scheduling.event;
 
 import edu.gatech.lbs.sim.Simulation;
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 
 public abstract class SimEvent {
   protected Simulation sim;
@@ -49,5 +49,7 @@ public abstract class SimEvent {
   public abstract byte getTypeCode();
 
   public abstract String toString();
+
+  public abstract void saveToTxt(PrintWriter out) throws IOException;
 
 }

@@ -25,7 +25,7 @@ public class GuiDrawingActivity implements ISimActivity {
 
   protected List<IDrawer> getDrawers(Simulation sim, SimPanel panel) {
     List<IDrawer> drawers = new ArrayList<IDrawer>();
-    drawers.add(new RoadMapDrawer(sim, panel));
+    drawers.add(new RoadMapDrawer(sim.getWorld(), panel));
     drawers.add(new AgentsDrawer(sim, panel));
     drawers.add(new TimeDrawer(sim));
     drawers.add(new RodDrawer(panel));
@@ -35,7 +35,7 @@ public class GuiDrawingActivity implements ISimActivity {
   public void scheduleOn(Simulation sim) {
     if (sim.getAgentCount() > 0) {
       try {
-        SimPanel panel = SimPanel.makeGui(sim);
+        SimPanel panel = SimPanel.makeGui(sim.getWorld(), null);
         panel.setDrawers(getDrawers(sim, panel));
         sim.addEvent(new DrawGUIEvent(sim, sim.getSimStartTime(), panel, period));
       } catch (Exception e) {

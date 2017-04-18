@@ -21,7 +21,6 @@ public class TrajectoriesDrawer implements IDrawer {
 
   public void draw(Graphics g) {
     g.setColor(Color.green);
-
     for (List<IVector> traj : trajs) {
       IDrawer trajDrawer = new TrajectoryDrawer(panel, traj, g.getColor());
       trajDrawer.draw(g);

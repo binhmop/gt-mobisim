@@ -4,10 +4,10 @@
 //
 package edu.gatech.lbs.sim.tracegenerator.mobilitytrace.locationdistribution;
 
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Random;
-
 import edu.gatech.lbs.core.vector.IVector;
 import edu.gatech.lbs.core.vector.RoadnetVector;
 import edu.gatech.lbs.core.world.roadnet.RoadJunctionDistance;
@@ -21,6 +21,7 @@ public class HotspotRoadnetLocationDistribution implements ILocationDistribution
   private double[] segmentWeights;
   private double totalWeights;
   private Random rnd;
+
 
   public HotspotRoadnetLocationDistribution(RoadMap roadmap, int hotspotCount, double coeff, long seed) {
     Collection<RoadSegment> segments0 = roadmap.getRoadSegments();
@@ -49,7 +50,8 @@ public class HotspotRoadnetLocationDistribution implements ILocationDistribution
       long lengthAvg = roadmap.getLengthTotal() / roadmap.getRoadSegments().size();
       for (int j = 0; j < segmentCount; j++) {
         RoadSegment seg = segments[j];
-        int dist = (j == centerNum) ? 0 : Math.min(junctionDist.get(seg.getSourceJunction().getId()).distance, junctionDist.get(seg.getTargetJunction().getId()).distance) + seg.getLength() / 2;
+        int dist = (j == centerNum) ? 0 : Math.min(junctionDist.get(seg.getSourceJunction().getId()).distance,
+            junctionDist.get(seg.getTargetJunction().getId()).distance) + seg.getLength() / 2;
         segmentWeights[j] += Math.pow(coeff, dist / (double) lengthAvg);
       }
     }
@@ -73,4 +75,5 @@ public class HotspotRoadnetLocationDistribution implements ILocationDistribution
 
     return new RoadnetVector(seg, (int) (rnd.nextDouble() * seg.getLength()));
   }
+
 }

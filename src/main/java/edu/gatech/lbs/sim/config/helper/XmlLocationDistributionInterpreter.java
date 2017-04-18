@@ -4,9 +4,9 @@
 //
 package edu.gatech.lbs.sim.config.helper;
 
+
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-
 import edu.gatech.lbs.core.world.roadnet.RoadMap;
 import edu.gatech.lbs.sim.Simulation;
 import edu.gatech.lbs.sim.config.IXmlConfigInterpreter;
@@ -18,6 +18,7 @@ import edu.gatech.lbs.sim.tracegenerator.mobilitytrace.locationdistribution.Unif
 
 public class XmlLocationDistributionInterpreter implements IXmlConfigInterpreter {
   protected ILocationDistribution locationDistribution;
+
 
   public ILocationDistribution getLocationDistribution() {
     return locationDistribution;
@@ -45,16 +46,13 @@ public class XmlLocationDistributionInterpreter implements IXmlConfigInterpreter
       }
       // int[] distrHierarchyStDev = { 5000, 500 };
       // double[] distrHierarcyExitProb = { 0.05, 0.1 };
-      locationDistribution = new HierarchicGaussianLocationDistribution(sim.getWorld().getBounds(), distrHierarchyStDev, distrHierarcyExitProb);
+      locationDistribution = new HierarchicGaussianLocationDistribution(sim.getWorld().getBounds(),
+          distrHierarchyStDev, distrHierarcyExitProb);
 
     } else if (locationdistributionType.equalsIgnoreCase(UniformRoadnetLocationDistribution.xmlName)) {
-      /** eg.:
-        <locationdistribution type="uniformroadnet">
-      	<class weight="0.2"/>
-      	<class weight="0.5"/>
-      	<class weight="0.2"/>
-      	<class weight="0.1"/>
-        </locationdistribution>
+      /**
+       * eg.: <locationdistribution type="uniformroadnet"> <class weight="0.2"/> <class weight="0.5"/> <class
+       * weight="0.2"/> <class weight="0.1"/> </locationdistribution>
        */
       NodeList classNodes = locationDistributionNode.getElementsByTagName("class");
       int classCount = classNodes.getLength();
@@ -76,7 +74,8 @@ public class XmlLocationDistributionInterpreter implements IXmlConfigInterpreter
         doLengthWeighting = false;
       }
 
-      locationDistribution = new UniformRoadnetLocationDistribution((RoadMap) sim.getWorld(), classWeight, doLengthWeighting);
+      locationDistribution = new UniformRoadnetLocationDistribution((RoadMap) sim.getWorld(), classWeight,
+          doLengthWeighting);
 
     } else if (locationdistributionType.equalsIgnoreCase(HotspotRoadnetLocationDistribution.xmlName)) {
       int hotspotCount = Integer.parseInt(locationDistributionNode.getAttribute("count"));
@@ -84,7 +83,8 @@ public class XmlLocationDistributionInterpreter implements IXmlConfigInterpreter
       String seedStr = locationDistributionNode.getAttribute("seed");
       long seed = seedStr.isEmpty() ? -1 : Long.parseLong(seedStr);
 
-      locationDistribution = new HotspotRoadnetLocationDistribution((RoadMap) sim.getWorld(), hotspotCount, coeff, seed);
+      locationDistribution = new HotspotRoadnetLocationDistribution((RoadMap) sim.getWorld(), hotspotCount, coeff,
+          seed);
 
     } else {
       System.out.println("Unknown location distribution: " + locationdistributionType);

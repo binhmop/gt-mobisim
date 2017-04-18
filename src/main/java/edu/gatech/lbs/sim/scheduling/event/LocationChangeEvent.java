@@ -4,10 +4,11 @@
 //
 package edu.gatech.lbs.sim.scheduling.event;
 
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-
+import java.io.PrintWriter;
 import edu.gatech.lbs.core.vector.IVector;
 import edu.gatech.lbs.core.vector.IVectorFactory;
 import edu.gatech.lbs.sim.Simulation;
@@ -18,6 +19,7 @@ public class LocationChangeEvent extends SimEvent implements IMobilityChangeEven
 
   protected SimAgent agent;
   protected IVector location;
+
 
   public LocationChangeEvent(Simulation sim, long timestamp, SimAgent agent, IVector location) {
     super(sim, timestamp);
@@ -45,6 +47,7 @@ public class LocationChangeEvent extends SimEvent implements IMobilityChangeEven
 
   public void execute() {
     sim.updateAgentIndex(agent, location);
+    sim.updateTrajectories(agent, location);
     agent.getSimPhysicalAttributes().setEvent(this);
   }
 
@@ -67,5 +70,14 @@ public class LocationChangeEvent extends SimEvent implements IMobilityChangeEven
   public String toString() {
     return "L";
     // return "[" + (char) getTypeCode() + "@" + timestamp + ", l=" + location + "]";
+  }
+
+  public void saveToTxt(PrintWriter out) throws IOException {
+    out.print("l ");
+    out.print(Long.toString(timestamp) + " ");
+    out.print(Integer.toString(agent.getSimAgentId()) + " ");
+    location.saveToTxt(out);
+    out.println();
+
   }
 }

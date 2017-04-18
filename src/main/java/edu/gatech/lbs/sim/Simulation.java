@@ -4,23 +4,22 @@
 //
 package edu.gatech.lbs.sim;
 
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
-
 import edu.gatech.lbs.core.FileHelper;
 import edu.gatech.lbs.core.logging.Logz;
 import edu.gatech.lbs.core.logging.Varz;
@@ -34,6 +33,10 @@ import edu.gatech.lbs.sim.config.NullInterpreter;
 import edu.gatech.lbs.sim.config.XmlAgentsConfigInterpreter;
 import edu.gatech.lbs.sim.config.XmlTimesConfigInterpreter;
 import edu.gatech.lbs.sim.config.XmlWorldConfigInterpreter;
+import edu.gatech.lbs.sim.gui.SimPanel;
+import edu.gatech.lbs.sim.gui.drawer.IDrawer;
+import edu.gatech.lbs.sim.gui.drawer.RoadMapDrawer;
+import edu.gatech.lbs.sim.gui.drawer.TrajectoriesDrawer;
 import edu.gatech.lbs.sim.scheduling.SimEventQueue;
 import edu.gatech.lbs.sim.scheduling.activity.ISimActivity;
 import edu.gatech.lbs.sim.scheduling.event.AccelerationChangeEvent;
@@ -65,13 +68,15 @@ public class Simulation {
   protected HashMap<Integer, List<SimAgent>> agentIndex; // segmentId --> SimAgent
 
   protected HashMap<QueryKey, LocationBasedQuery> queries; // simQueryKey -> query
-
+  protected HashMap<Integer, List<IVector>> trajectories;// agentID -->list of locations
   protected SimEventQueue eventQueue; // the simulation event queue
   protected Collection<ISimActivity> simActivities;
+
 
   public Simulation() {
     simActivities = new LinkedList<ISimActivity>();
     agents = new HashMap<Integer, SimAgent>();
+    trajectories = new HashMap<Integer, List<IVector>>();
   }
 
   public void setSimTimes(long simStartTime, long simEndTime, long simWarmupDuration) {
@@ -129,6 +134,34 @@ public class Simulation {
 
   public int getAgentCount() {
     return agents.size();
+  }
+
+  public HashMap<Integer, List<IVector>> getTrajectories() {
+    return trajectories;
+  }
+
+  public void updateTrajectories(SimAgent agent, IVector newLocation) {
+    List<IVector> trace = trajectories.get(agent.getSimAgentId());
+    if (trace == null) {
+      trace = new LinkedList<IVector>();
+      trajectories.put(agent.getSimAgentId(), trace);
+    }
+    trace.add(newLocation);
+  }
+
+  public void drawTrajectories() {
+    try {
+      SimPanel panel = SimPanel.makeGui(this.getWorld(), "Road Network Trajectories");
+      List<IDrawer> drawers = new ArrayList<IDrawer>();
+      drawers.add(new RoadMapDrawer(this.getWorld(), panel));
+      drawers.add(new TrajectoriesDrawer(this.getTrajectories().values(), panel));
+      panel.setDrawers(drawers);
+      panel.redrawSim();
+      panel.repaint();
+    } catch (Exception e) {
+      Logz.println("No GUI.");
+    }
+
   }
 
   public void updateAgentIndex(SimAgent agent, IVector newLocation) {
@@ -200,7 +233,8 @@ public class Simulation {
     simActivities.clear();
 
     try {
-      Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(new StringReader(configText)));
+      Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder()
+          .parse(new InputSource(new StringReader(configText)));
       Element rootNode = doc.getDocumentElement();
 
       Collection<IXmlConfigInterpreter> interpreters = getConfigInterpreters();
@@ -245,9 +279,8 @@ public class Simulation {
   }
 
   /**
-   * Initializes the simulation.
-   * This method is used to put the simulation in an initial, pre-run state, based on
-   * the previously loaded configuration.
+   * Initializes the simulation. This method is used to put the simulation in an initial, pre-run state, based on the
+   * previously loaded configuration.
    */
   public void initSimulation() {
     eventQueue = new SimEventQueue();
@@ -286,13 +319,17 @@ public class Simulation {
       eventsProcessed++;
 
       if (eventsProcessed % 1000000 == 1) {
-        Logz.println(" Queue has " + eventQueue.size() + " events, simTime= " + String.format("%.1f", eventQueue.getNextEventTime() / (1000 * 60.0)) + " min, wallTime= " + String.format("%.1f", (System.nanoTime() - wallStartTime) / (1e9 * 60.0)) + " min");
+        Logz.println(" Queue has " + eventQueue.size() + " events, simTime= "
+            + String.format("%.1f", eventQueue.getNextEventTime() / (1000 * 60.0)) + " min, wallTime= "
+            + String.format("%.1f", (System.nanoTime() - wallStartTime) / (1e9 * 60.0)) + " min");
       }
     }
     Varz.set("eventsProcessed", eventsProcessed); // for the whole simulation, including warmup
-    Varz.set("wallRunTime", (System.nanoTime() - wallStartTime) / 1e9); // [sec], for the whole simulation, including warmup
+    Varz.set("wallRunTime", (System.nanoTime() - wallStartTime) / 1e9); // [sec], for the whole simulation, including
+                                                                        // warmup
     double simToWallSpeedRatio = (simEndTime - simStartTime) / ((System.nanoTime() - wallStartTime) / 1e6);
-    Logz.println(" Speed: " + String.format("%.1f", simToWallSpeedRatio) + "x realtime (" + String.format("%.1f", simToWallSpeedRatio) + " simulated minutes/wall minute)");
+    Logz.println(" Speed: " + String.format("%.1f", simToWallSpeedRatio) + "x realtime ("
+        + String.format("%.1f", simToWallSpeedRatio) + " simulated minutes/wall minute)");
     Logz.println("DONE.");
 
     Varz.set("simRunTime", (simEndTime - simStartTime - simWarmupDuration) / 1000.0); // [sec], without warmup
@@ -300,9 +337,9 @@ public class Simulation {
   }
 
   /**
-   * Special-purpose simulation runner, that executes quietly and without logging, up to the exact
-   * time specified. The primary purpose is to run the mobility-models, so the agent locations are
-   * available immediately after the specified point in time.
+   * Special-purpose simulation runner, that executes quietly and without logging, up to the exact time specified. The
+   * primary purpose is to run the mobility-models, so the agent locations are available immediately after the specified
+   * point in time.
    */
   public void runSimulationTo(long simEndTime) {
     while ((simTime = eventQueue.getNextEventTime()) >= 0 && simTime <= simEndTime) {
@@ -312,8 +349,7 @@ public class Simulation {
   }
 
   /**
-   * Provides the ordered set of configuration interpreters, which can understand a simulation
-   * configuration file.
+   * Provides the ordered set of configuration interpreters, which can understand a simulation configuration file.
    * Override this method to customize how a config xml is interpreted & how the simulation is set up.
    */
   protected Collection<IXmlConfigInterpreter> getConfigInterpreters() {
@@ -339,6 +375,7 @@ public class Simulation {
     sim.loadConfiguration(args[0]);
     sim.initSimulation();
     sim.runSimulation();
+    sim.drawTrajectories();
     sim.endSimulation();
   }
 

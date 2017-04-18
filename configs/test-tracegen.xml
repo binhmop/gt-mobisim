@@ -1,0 +1,31 @@
+<simulation starttime="0 min" endtime="30 min" warmup="90 sec">
+  <world type="roadnet">
+  <file name="configs/maps/Northwest_Atlanta_GA_24k.svg">
+    <class name="CLASS_1" v_max="70 mph"/>
+    <class name="CLASS_2" v_max="55 mph"/>
+    <class name="CLASS_3" v_max="30 mph"/>
+    <class name="INTERCHANGE" v_max="30 mph"/>
+  </file>
+  </world>
+
+  <agents count="100">
+    <mobilitymodel type="FixedEndpointRoadnet" filename="configs/traces/sim.m.trace" startCount="4" destCount="3">
+      <parking type="gaussian" mean="10 sec" stdev="5 sec"/>
+			
+      <locationdistribution type="hotspotroadnet" count="3" coeff="0.9" seed="0"/>
+			
+      <speeddistribution type="roadnet">
+        <class type="gaussian" mean="70 mph" stdev="14 mph"/>
+        <class type="gaussian" mean="55 mph" stdev="11 mph"/>
+        <class type="gaussian" mean="30 mph" stdev="6 mph"/>
+        <class type="gaussian" mean="30 mph" stdev="6 mph"/>
+      </speeddistribution>
+    </mobilitymodel>
+
+    <querymodel type="fixednumber_range" count="100" filename="configs/traces/sim.q.trace">
+      <locationdistribution type="uniformroadnet"/>
+      <radius type="gaussian" mean="2 mi" stdev="0.4 mi" />
+      <lifetime type="gaussian" mean="4 min" stdev="0.8 min" />
+    </querymodel>
+  </agents>
+</simulation>
