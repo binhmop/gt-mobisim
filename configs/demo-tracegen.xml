@@ -1,19 +1,19 @@
 <simulation starttime="0 min" endtime="10 min" warmup="2 min">
   <world type="roadnet">
-    <file name="maps/tl_2008_13089_edges.shp"/>
+    <file name="configs/maps/tl_2008_13089_edges.shp"/>
   </world>
   
   <agents count="100">
-    <mobilitymodel type="RandomWaypointRoadnet" filename="traces/demo-sim.m.trace">
+    <mobilitymodel type="RandomWaypointRoadnet" filename="configs/traces/demo-sim.m.trace">
       <parking type="gaussian" mean="15 sec" stdev="5 sec"/>
       <locationdistribution type="uniformroadnet"/>
       
       <speeddistribution type="gaussian" mean="55 mph" stdev="11 mph"/>
     </mobilitymodel>
 
-    <periodictraceoutput period="10 sec" filename="traces/demo-sim.m.pos.trace"/>
+    <periodictraceoutput period="10 sec" filename="configs/traces/demo-sim.m.pos.trace"/>
 
-    <querymodel type="fixednumber_range" count="100" filename="traces/demo-sim.q(02mi).trace">
+    <querymodel type="fixednumber_range" count="100" filename="configs/traces/demo-sim.q(02mi).trace">
       <locationdistribution type="hotspotroadnet" count="1" coeff="0.5" seed="0"/>
       <radius type="gaussian" mean="2 mi" stdev="0.4 mi" />
       <lifetime type="gaussian" mean="4 min" stdev="0.8 min" />
